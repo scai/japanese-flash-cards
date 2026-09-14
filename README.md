@@ -16,7 +16,9 @@ Space flips a card; left/right arrows navigate when focus is outside interactive
 
 Download or copy `sample-card-set.json`. Each set has a `name` and a nonempty `cards` array. Each card requires `japanese` and `chinese`; `reading` is optional. Import one or multiple JSON files; a file can contain either one set object or an array of set objects. Imported content is displayed as plain text.
 
-Imports are saved locally in the current browser where storage is available; they are not uploaded to GitHub or synced across devices. Keep your original JSON files as backups. Importing the same file twice adds a second copy. Built-in vocabulary is illustrative, not a transcription of any particular textbook.
+Imports are saved locally in the current browser where storage is available; they are not uploaded to GitHub or synced across devices. Keep your original JSON files as backups. Importing the same file twice adds a second copy.
+
+Lesson 27 contains all 44 entries transcribed from the supplied textbook image: 24 vocabulary entries, 5 conversation entries, and 15 reading entries, in page order. Readings, usage brackets, verb groups, and traditional Chinese meanings are retained; pitch-accent marks are not encoded. The two other built-in sets are illustrative samples.
 
 ## GitHub synchronization
 

@@ -4,7 +4,55 @@ const examples = [
   {id:'sample-2',name:'示例教材 · 第 2 课',cards:[{japanese:'本',reading:'ほん',chinese:'书'},{japanese:'辞書',reading:'じしょ',chinese:'词典'},{japanese:'時計',reading:'とけい',chinese:'钟表；手表'},{japanese:'傘',reading:'かさ',chinese:'伞'},{japanese:'鞄',reading:'かばん',chinese:'包'},{japanese:'鉛筆',reading:'えんぴつ',chinese:'铅笔'}]}
 ];
 const $ = id => document.getElementById(id);
-let sets = [...examples], selected = new Set(['sample-1']), deck = [], position = 0, revealed = false;
+// Transcribed from the supplied Lesson 27 page, in textbook order:
+// 単語 (24), 会話 (5), 読み物 (15). I/II indicate verb groups.
+const lesson27 = {id:'lesson-27',name:'第 27 课 · 何でも 作れるんですね',cards:[
+  {japanese:'飼います',reading:'かいます',chinese:'飼養（動詞 I）'},
+  {japanese:'走ります［道を～］',reading:'はしります［みちを～］',chinese:'跑、奔馳［在路上］（動詞 I）'},
+  {japanese:'見えます［山が～］',reading:'みえます［やまが～］',chinese:'看得見［山］（動詞 II）'},
+  {japanese:'聞こえます［音が～］',reading:'きこえます［おとが～］',chinese:'聽得見［聲音］（動詞 II）'},
+  {japanese:'できます［道が～］',reading:'できます［みちが～］',chinese:'建好、修好［道路］（動詞 II）'},
+  {japanese:'開きます［教室を～］',reading:'ひらきます［きょうしつを～］',chinese:'開［教室］（動詞 I）'},
+  {japanese:'心配［な］',reading:'しんぱい［な］',chinese:'擔心'},
+  {japanese:'ペット',reading:'ペット',chinese:'寵物'},
+  {japanese:'鳥',reading:'とり',chinese:'鳥'},
+  {japanese:'声',reading:'こえ',chinese:'聲音'},
+  {japanese:'波',reading:'なみ',chinese:'波浪'},
+  {japanese:'花火',reading:'はなび',chinese:'煙火'},
+  {japanese:'道具',reading:'どうぐ',chinese:'工具'},
+  {japanese:'クリーニング',reading:'クリーニング',chinese:'（乾）洗、洗衣'},
+  {japanese:'家',reading:'いえ',chinese:'家、住宅'},
+  {japanese:'マンション',reading:'マンション',chinese:'公寓'},
+  {japanese:'キッチン',reading:'キッチン',chinese:'廚房'},
+  {japanese:'～教室',reading:'～きょうしつ',chinese:'～教室'},
+  {japanese:'パーティールーム',reading:'パーティールーム',chinese:'宴會廳'},
+  {japanese:'方',reading:'かた',chinese:'人（「ひと」的尊敬語）'},
+  {japanese:'～後',reading:'～ご',chinese:'～後（時間上）'},
+  {japanese:'～しか',reading:'～しか',chinese:'只～（後接否定）'},
+  {japanese:'ほかの',reading:'ほかの',chinese:'其他的'},
+  {japanese:'はっきり',reading:'はっきり',chinese:'清楚地'},
+  {japanese:'家具',reading:'かぐ',chinese:'家具'},
+  {japanese:'本棚',reading:'ほんだな',chinese:'書架'},
+  {japanese:'いつか',reading:'いつか',chinese:'什麼時候'},
+  {japanese:'建てます',reading:'たてます',chinese:'建、蓋（動詞 II）'},
+  {japanese:'すばらしい',reading:'すばらしい',chinese:'很棒、了不起'},
+  {japanese:'子どもたち',reading:'こどもたち',chinese:'孩子們'},
+  {japanese:'大好き［な］',reading:'だいすき［な］',chinese:'非常喜歡'},
+  {japanese:'主人公',reading:'しゅじんこう',chinese:'主人翁'},
+  {japanese:'形',reading:'かたち',chinese:'形狀、樣子'},
+  {japanese:'不思議［な］',reading:'ふしぎ［な］',chinese:'不可思議'},
+  {japanese:'ポケット',reading:'ポケット',chinese:'口袋'},
+  {japanese:'例えば',reading:'たとえば',chinese:'例如'},
+  {japanese:'付けます',reading:'つけます',chinese:'戴上（動詞 II）'},
+  {japanese:'自由に',reading:'じゆうに',chinese:'自由地、隨意地'},
+  {japanese:'空',reading:'そら',chinese:'天空'},
+  {japanese:'飛びます',reading:'とびます',chinese:'飛、飛翔（動詞 I）'},
+  {japanese:'昔',reading:'むかし',chinese:'過去、以前'},
+  {japanese:'自分',reading:'じぶん',chinese:'自己'},
+  {japanese:'将来',reading:'しょうらい',chinese:'將來'},
+  {japanese:'ドラえもん',reading:'ドラえもん',chinese:'哆啦 A 夢（動漫登場人物的名字）'}
+]};
+let sets = [lesson27,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
 function validateSets(value) {
   const batch = Array.isArray(value) ? value : [value];
   if (!batch.length || batch.length > 100) throw new Error('文件需包含 1–100 个词卡集。');
@@ -76,7 +124,7 @@ $('import-file').addEventListener('change',async event => {
     for (const file of files) { if (file.size > 2 * 1024 * 1024) throw new Error('每个文件不能超过 2 MB。'); imported.push(...validateSets(JSON.parse(await file.text()))); }
     sets.push(...imported); imported.forEach(set => selected.add(set.id));
     let message = `已导入 ${imported.length} 个词卡集。`;
-    try { localStorage.setItem('kotoba-imports',JSON.stringify(sets.filter(set => !set.id.startsWith('sample-')))); message += '已保存在此浏览器。'; }
+    try { localStorage.setItem('kotoba-imports',JSON.stringify(sets.filter(set => set.id.startsWith('import-')))); message += '已保存在此浏览器。'; }
     catch { message += '浏览器无法保存，刷新后需重新导入。'; }
     $('import-status').textContent = message; renderSets(); rebuild();
   } catch (error) { $('import-status').textContent = `导入失败：${error instanceof SyntaxError ? 'JSON 格式不正确，请参考模板。' : error.message}`; }
