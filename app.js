@@ -52,7 +52,8 @@ const lesson27 = {id:'lesson-27',name:'第 27 课 · 何でも 作れるんで�
   {japanese:'将来',reading:'しょうらい',chinese:'將來'},
   {japanese:'ドラえもん',reading:'ドラえもん',chinese:'哆啦 A 夢（動漫登場人物的名字）'}
 ]};
-let sets = [lesson27,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
+const textbookLessons = [...imageLessons, {...lesson27, number:27, source:'CamScanner 2026-02-02 21.29_05.jpg'}].sort((a,b) => a.number - b.number);
+let sets = [...textbookLessons,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
 function validateSets(value) {
   const batch = Array.isArray(value) ? value : [value];
   if (!batch.length || batch.length > 100) throw new Error('文件需包含 1–100 个词卡集。');
