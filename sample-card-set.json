@@ -1,0 +1,7 @@
+{
+  "name": "我的教材 · 第 1 课",
+  "cards": [
+    { "japanese": "学校", "reading": "がっこう", "chinese": "学校" },
+    { "japanese": "勉強", "reading": "べんきょう", "chinese": "学习；用功" }
+  ]
+}

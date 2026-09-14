@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="按课学习日语单词：中日双语闪卡，支持多个词卡集与随机练习。">
+  <title>言葉 · 日语词卡</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%232744cb'/%3E%3Ctext x='20' y='29' font-size='27' text-anchor='middle' fill='white'%3E言%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="./"><span class="logo">言</span><span>言葉 <small>日语词卡</small></span></a><span class="header-note">每天一点，慢慢记住。</span></header>
+  <main>
+    <aside aria-label="词卡集">
+      <div class="section-heading"><h1>我的词卡集</h1><span id="set-count"></span></div>
+      <p class="muted">选择一课，或把多课一起练习。</p>
+      <div id="sets"></div>
+      <button id="import-button" class="import-button">＋ 导入词卡集</button>
+      <input id="import-file" type="file" accept=".json,application/json" multiple hidden>
+      <p class="small muted">支持 JSON 文件，可一次选择多个文件。<a href="sample-card-set.json" download>下载模板</a></p>
+      <p id="import-status" class="small" role="status"></p>
+      <div class="sample-note">内置词卡仅为示例，并非特定教材内容。导入自己的词表即可按课练习。</div>
+    </aside>
+    <section class="practice" aria-label="闪卡练习">
+      <div class="practice-heading"><div><p class="eyebrow">DAILY PRACTICE</p><h2>今天，记住几个新词。</h2></div><span id="loaded" class="badge"></span></div>
+      <div class="toolbar"><fieldset><legend class="sr-only">练习顺序</legend><label><input type="radio" name="order" value="ordered" checked><span>顺序练习</span></label><label><input type="radio" name="order" value="random"><span>随机练习</span></label></fieldset><label class="direction-label">卡片正面 <select id="direction"><option value="ja">日语</option><option value="zh">中文</option></select></label></div>
+      <div class="card-meta"><span id="lesson"></span><span id="counter"></span></div>
+      <button id="card" class="card" aria-label="翻转词卡"><span id="face-label" class="face-label"></span><span id="word" class="word" lang="ja"></span><span id="reading" class="reading" lang="ja"></span><span id="meaning" class="meaning"></span><span id="flip-hint" class="flip-hint">点击卡片，查看答案 ↻</span></button>
+      <progress id="progress" value="1" max="1" aria-label="练习进度"></progress>
+      <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="flip" class="primary">查看答案</button><button id="next" class="secondary">下一张 →</button></div>
+      <div class="practice-footer"><span>快捷键：<kbd>←</kbd> <kbd>→</kbd> 切换 · <kbd>空格</kbd> 翻面</span><button id="restart" class="text-button">重新开始 ↺</button></div>
+    </section>
+  </main>
+  <footer>言葉 / KOTOBA <span>一张词卡，一点进步。</span></footer>
+</body>
+</html>
