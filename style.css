@@ -17,8 +17,14 @@ body:has(dialog[open]){overflow:hidden}
 .panel-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .panel-heading h2{font-size:23px;margin:0}
 dialog .section-heading h3{font-size:16px;margin:0}
-dialog #sets{display:block;max-height:42dvh}
-dialog .set{margin:10px 0}
+dialog #sets{display:block;max-height:52dvh;padding:4px 0}
+dialog .set{margin:0;padding:9px 4px;min-height:42px;border:0;border-radius:0;gap:10px;background:transparent}
+dialog .set:hover{background:#f5f7fc}
+dialog .set:has(input:checked){background:#edf0ff}
+dialog .set>span{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-width:0;flex:1}
+dialog .set strong{font-size:14px;line-height:1.5;font-weight:500;overflow-wrap:anywhere}
+dialog .set small{margin:0;font-size:13px;white-space:nowrap;flex-shrink:0}
+dialog .set input{margin:0;flex-shrink:0}
 dialog fieldset{display:block;padding:16px;background:#f5f7fc;margin:24px 0;border:1px solid #dce2f2}
 dialog fieldset legend{font-size:16px;padding:0 5px}
 dialog fieldset label{display:flex;align-items:center;gap:10px}
