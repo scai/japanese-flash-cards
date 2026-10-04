@@ -60,7 +60,7 @@ function saveLocal(key, value) {
   catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
 }
 function savePreferences() {
-  saveLocal('kotoba-preferences', {selected:[...selected],order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value});
+  saveLocal('kotoba-preferences', {selected:[...selected],order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value,navigationSide:$('navigation-side').value});
 }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
@@ -68,6 +68,7 @@ try {
     if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.filter(id => sets.some(set => set.id === id)));
     if (['ordered','random'].includes(prefs.order)) document.querySelector(`input[name="order"][value="${prefs.order}"]`).checked = true;
     if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
+    if (['left','right'].includes(prefs.navigationSide)) $('navigation-side').value = prefs.navigationSide;
   }
   const savedHistory = JSON.parse(localStorage.getItem('kotoba-history') || '[]');
   if (Array.isArray(savedHistory)) history = savedHistory.filter(item => item && typeof item.id === 'string' && Number.isFinite(Date.parse(item.startedAt)) && Array.isArray(item.lessons) && item.lessons.every(name => typeof name === 'string') && Number.isInteger(item.reviewed) && item.reviewed > 0 && Number.isInteger(item.total) && item.total >= item.reviewed).slice(0,100);
@@ -188,6 +189,9 @@ $('previous').addEventListener('click',() => move(-1)); $('next').addEventListen
 $('restart').addEventListener('click',rebuild);
 document.querySelectorAll('input[name="order"]').forEach(input => input.addEventListener('change',() => { savePreferences(); rebuild(); }));
 $('direction').addEventListener('change',() => { savePreferences(); rebuild(); });
+function applyNavigationSide() { document.body.dataset.navigationSide = $('navigation-side').value; }
+$('navigation-side').addEventListener('change',() => { applyNavigationSide(); savePreferences(); });
+applyNavigationSide();
 document.addEventListener('keydown',event => {
   if (event.key === 'Escape' && !$('app-menu').hidden) { closeMenu(); $('menu-button').focus(); return; }
   if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;

@@ -12,6 +12,10 @@ The main screen focuses on daily practice. Open **菜单** for **词卡集管理
 
 Practice history starts when you reveal an answer. A card is counted once per round, even if flipped repeatedly; a round is complete when every card's answer has been revealed. Restarting, changing selected sets or preferences, or reloading starts a new round. The most recent 100 rounds are saved locally, including partial rounds; no earlier practice history is backfilled.
 
+In landscape, the practice screen fits the viewport with navigation beside the card. Choose **偏好设置 → 横屏导航位置** to place controls on the left or right (right by default). This preference is saved without restarting the round. Portrait retains controls below the card; secondary panels scroll independently when needed.
+
+Layout regression check: with Playwright and Microsoft Edge available, start the preview server and run `node tests/landscape.cjs`. It checks every vocabulary answer at five landscape sizes, both control positions, persistence, and the empty selection state.
+
 Open `index.html` in a modern browser, or serve this directory using any static web server. Select one or multiple lesson sets, choose ordered or random practice, and click a card to reveal the reading and Chinese meaning. You can also practice with Chinese on the front. Previous/next navigation stops at the ends; Restart starts a new pass and reshuffles in random mode.
 
 Space flips a card; left/right arrows navigate when the card is focused or focus is outside other interactive controls. The card also supports Enter to flip. On touch devices, swiping left or right on the card navigates between cards. Other buttons retain their normal keyboard behavior, and practice shortcuts are inactive while a menu or panel is open.
