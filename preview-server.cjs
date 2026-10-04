@@ -4,8 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assets = new Map([
   ['index.html', 'text/html'], ['style.css', 'text/css'],
-  ['app.js', 'text/javascript'], ['textbook-sets.js', 'text/javascript'],
-  ['sample-card-set.json', 'application/json']
+  ['app.js', 'text/javascript'], ['textbook-sets.js', 'text/javascript']
 ]);
 http.createServer((req, res) => {
   let name;

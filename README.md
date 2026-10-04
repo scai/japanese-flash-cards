@@ -8,7 +8,7 @@ A Chinese-language Japanese vocabulary practice app built with standard HTML5, C
 
 ## Use
 
-The main screen focuses on daily practice. Open **菜单** for **词卡集管理** (select lessons and import files), **偏好设置** (ordered/random practice and Japanese/Chinese fronts), or **练习历史**. Panels support keyboard navigation and Escape to close. Preferences and lesson selections are saved in this browser.
+The main screen focuses on daily practice. Open **菜单** for **词卡集管理** (select lesson sets), **偏好设置** (ordered/random practice and Japanese/Chinese fronts), or **练习历史**. Panels support keyboard navigation and Escape to close. Preferences and lesson selections are saved in this browser.
 
 Practice history starts when you reveal an answer. A card is counted once per round, even if flipped repeatedly; a round is complete when every card's answer has been revealed. Restarting, changing selected sets or preferences, or reloading starts a new round. The most recent 100 rounds are saved locally, including partial rounds; no earlier practice history is backfilled.
 
@@ -16,11 +16,9 @@ Open `index.html` in a modern browser, or serve this directory using any static 
 
 Space flips a card; left/right arrows navigate when focus is outside interactive controls. Buttons also support their normal keyboard behavior.
 
-## Add textbook vocabulary
+## Textbook vocabulary
 
-Download or copy `sample-card-set.json`. Each set has a `name` and a nonempty `cards` array. Each card requires `japanese` and `chinese`; `reading` is optional. Import one or multiple JSON files; a file can contain either one set object or an array of set objects. Imported content is displayed as plain text.
-
-Imports are saved locally in the current browser where storage is available; they are not uploaded to GitHub or synced across devices. Keep your original JSON files as backups. Importing the same file twice adds a second copy.
+End-user imports are not available. Vocabulary is maintained in the project source. Previously imported browser data is left untouched but is no longer loaded.
 
 The 14 supplied images are included as 14 textbook sets (514 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections are included in page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded. Lesson 15's supplied image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 is included once. The two other built-in sets are illustrative samples.
 
@@ -45,6 +43,6 @@ The 14 supplied images are included as 14 textbook sets (514 cards), named using
 
 ## GitHub synchronization
 
-After a remote repository is configured, use `git pull --ff-only` before editing. To sync changes, run `git add index.html style.css app.js textbook-sets.js preview-server.cjs sample-card-set.json README.md .gitignore`, then `git commit -m "Update flashcards"` and `git push`. Synchronization is explicit, not an automatic background service.
+After a remote repository is configured, use `git pull --ff-only` before editing. To sync changes, run `git add index.html style.css app.js textbook-sets.js preview-server.cjs README.md .gitignore`, then `git commit -m "Update flashcards"` and `git push`. Synchronization is explicit, not an automatic background service.
 
 The app can be hosted by any static hosting provider, including GitHub Pages.

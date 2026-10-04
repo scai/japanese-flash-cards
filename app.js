@@ -62,22 +62,6 @@ function saveLocal(key, value) {
 function savePreferences() {
   saveLocal('kotoba-preferences', {selected:[...selected],order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value});
 }
-function validateSets(value, restore = false) {
-  const batch = Array.isArray(value) ? value : [value];
-  if (!batch.length || batch.length > 100) throw new Error('文件需包含 1–100 个词卡集。');
-  return batch.map(set => {
-    if (!set || typeof set.name !== 'string' || !set.name.trim() || set.name.length > 120 || !Array.isArray(set.cards) || !set.cards.length || set.cards.length > 5000) throw new Error('每个词卡集需有 name 和 1–5000 张 cards。');
-    const cards = set.cards.map(card => {
-      if (!card || ['japanese','chinese'].some(key => typeof card[key] !== 'string' || !card[key].trim() || card[key].length > 500) || (card.reading !== undefined && (typeof card.reading !== 'string' || card.reading.length > 500))) throw new Error('每张卡需有 japanese、chinese，reading 为可选的读音。');
-      return {japanese:card.japanese.trim(),chinese:card.chinese.trim(),reading:(card.reading || '').trim()};
-    });
-    return {id:restore && typeof set.id === 'string' && /^import-[a-zA-Z0-9-]+$/.test(set.id) ? set.id : 'import-'+crypto.randomUUID(),name:set.name.trim(),cards};
-  });
-}
-try {
-  const saved = localStorage.getItem('kotoba-imports');
-  if (saved) sets.push(...validateSets(JSON.parse(saved), true));
-} catch { $('import-status').textContent = '未能读取本机保存的词表，请重新导入。'; }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
   if (prefs) {
@@ -174,19 +158,5 @@ document.addEventListener('keydown',event => {
   if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;
   if (/INPUT|SELECT|TEXTAREA|BUTTON|A/.test(event.target.tagName) || event.altKey || event.ctrlKey || event.metaKey) return;
   if (['ArrowLeft','ArrowRight',' '].includes(event.key)) { event.preventDefault(); event.key === ' ' ? flip() : move(event.key === 'ArrowLeft' ? -1 : 1); }
-});
-$('import-button').addEventListener('click',() => $('import-file').click());
-$('import-file').addEventListener('change',async event => {
-  const files = [...event.target.files]; if (!files.length) return;
-  try {
-    const imported = [];
-    for (const file of files) { if (file.size > 2 * 1024 * 1024) throw new Error('每个文件不能超过 2 MB。'); imported.push(...validateSets(JSON.parse(await file.text()))); }
-    sets.push(...imported); imported.forEach(set => selected.add(set.id));
-    let message = `已导入 ${imported.length} 个词卡集。`;
-    try { localStorage.setItem('kotoba-imports',JSON.stringify(sets.filter(set => set.id.startsWith('import-')))); message += '已保存在此浏览器。'; }
-    catch { message += '浏览器无法保存，刷新后需重新导入。'; }
-    $('import-status').textContent = message; savePreferences(); renderSets(); rebuild();
-  } catch (error) { $('import-status').textContent = `导入失败：${error instanceof SyntaxError ? 'JSON 格式不正确，请参考模板。' : error.message}`; }
-  event.target.value = '';
 });
 renderSets(); rebuild();
