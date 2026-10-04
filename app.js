@@ -54,7 +54,15 @@ const lesson27 = {id:'lesson-27',name:'第 27 课 · 何でも 作れるんで�
 ]};
 const textbookLessons = [...imageLessons, {...lesson27, number:27, source:'CamScanner 2026-02-02 21.29_05.jpg'}].sort((a,b) => a.number - b.number);
 let sets = [...textbookLessons,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
-function validateSets(value) {
+let history = [], session = null, reviewed = new Set();
+function saveLocal(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
+}
+function savePreferences() {
+  saveLocal('kotoba-preferences', {selected:[...selected],order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value});
+}
+function validateSets(value, restore = false) {
   const batch = Array.isArray(value) ? value : [value];
   if (!batch.length || batch.length > 100) throw new Error('文件需包含 1–100 个词卡集。');
   return batch.map(set => {
@@ -63,19 +71,65 @@ function validateSets(value) {
       if (!card || ['japanese','chinese'].some(key => typeof card[key] !== 'string' || !card[key].trim() || card[key].length > 500) || (card.reading !== undefined && (typeof card.reading !== 'string' || card.reading.length > 500))) throw new Error('每张卡需有 japanese、chinese，reading 为可选的读音。');
       return {japanese:card.japanese.trim(),chinese:card.chinese.trim(),reading:(card.reading || '').trim()};
     });
-    return {id:'import-'+crypto.randomUUID(),name:set.name.trim(),cards};
+    return {id:restore && typeof set.id === 'string' && /^import-[a-zA-Z0-9-]+$/.test(set.id) ? set.id : 'import-'+crypto.randomUUID(),name:set.name.trim(),cards};
   });
 }
 try {
   const saved = localStorage.getItem('kotoba-imports');
-  if (saved) sets.push(...validateSets(JSON.parse(saved)));
+  if (saved) sets.push(...validateSets(JSON.parse(saved), true));
 } catch { $('import-status').textContent = '未能读取本机保存的词表，请重新导入。'; }
+try {
+  const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
+  if (prefs) {
+    if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.filter(id => sets.some(set => set.id === id)));
+    if (['ordered','random'].includes(prefs.order)) document.querySelector(`input[name="order"][value="${prefs.order}"]`).checked = true;
+    if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
+  }
+  const savedHistory = JSON.parse(localStorage.getItem('kotoba-history') || '[]');
+  if (Array.isArray(savedHistory)) history = savedHistory.filter(item => item && typeof item.id === 'string' && Number.isFinite(Date.parse(item.startedAt)) && Array.isArray(item.lessons) && item.lessons.every(name => typeof name === 'string') && Number.isInteger(item.reviewed) && item.reviewed > 0 && Number.isInteger(item.total) && item.total >= item.reviewed).slice(0,100);
+} catch { $('storage-status').textContent = '部分本机设置或历史无法读取，已使用默认值。'; }
+function recordReview() {
+  if (reviewed.has(position)) return;
+  reviewed.add(position);
+  if (!session) {
+    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value};
+    history.unshift(session); history = history.slice(0,100);
+  }
+  session.reviewed = reviewed.size;
+  saveLocal('kotoba-history',history);
+}
+function renderHistory() {
+  $('history-empty').hidden = history.length > 0;
+  $('history-list').replaceChildren();
+  history.forEach(item => {
+    const row = document.createElement('li'), title = document.createElement('strong'), details = document.createElement('p'), lessons = document.createElement('p');
+    title.textContent = new Date(item.startedAt).toLocaleString('zh-CN',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    details.textContent = `已复习 ${item.reviewed} / ${item.total} 张 · ${item.reviewed === item.total ? '已完成' : '未完成'} · ${item.order === 'random' ? '随机' : '顺序'} · ${item.direction === 'zh' ? '中文正面' : '日语正面'}`;
+    lessons.textContent = item.lessons.join('、'); row.append(title,details,lessons); $('history-list').append(row);
+  });
+}
+function closeMenu() { $('app-menu').hidden = true; $('menu-button').setAttribute('aria-expanded','false'); }
+$('menu-button').addEventListener('click', () => {
+  const opening = $('app-menu').hidden;
+  $('app-menu').hidden = !opening; $('menu-button').setAttribute('aria-expanded',String(opening));
+  if (opening) $('app-menu').querySelector('button').focus();
+});
+document.addEventListener('click',event => { if (!event.target.closest('.menu-wrap')) closeMenu(); });
+document.querySelectorAll('[data-panel]').forEach(button => button.addEventListener('click',() => {
+  closeMenu();
+  if (button.dataset.panel === 'history-panel') renderHistory();
+  $(button.dataset.panel).showModal();
+}));
+document.querySelectorAll('dialog').forEach(panel => {
+  panel.querySelector('.close-panel').addEventListener('click',() => panel.close());
+  panel.addEventListener('close',() => $('menu-button').focus());
+});
 function renderSets() {
   $('sets').replaceChildren();
   sets.forEach(set => {
     const label = document.createElement('label'); label.className = 'set';
     const input = document.createElement('input'); input.type = 'checkbox'; input.checked = selected.has(set.id);
-    input.addEventListener('change', () => { input.checked ? selected.add(set.id) : selected.delete(set.id); rebuild(); });
+    input.addEventListener('change', () => { input.checked ? selected.add(set.id) : selected.delete(set.id); savePreferences(); rebuild(); });
     const copy = document.createElement('span'), title = document.createElement('strong'), count = document.createElement('small');
     title.textContent = set.name; count.textContent = `${set.cards.length} 个单词`;
     copy.append(title,count); label.append(input,copy); $('sets').append(label);
@@ -83,6 +137,7 @@ function renderSets() {
   $('set-count').textContent = `${sets.length} 课`;
 }
 function rebuild() {
+  session = null; reviewed = new Set();
   deck = sets.filter(set => selected.has(set.id)).flatMap(set => set.cards.map(card => ({...card,lesson:set.name})));
   if (document.querySelector('input[name="order"]:checked').value === 'random') {
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i],deck[j]] = [deck[j],deck[i]]; }
@@ -92,6 +147,7 @@ function rebuild() {
 function render() {
   const card = deck[position], zh = $('direction').value === 'zh';
   $('loaded').textContent = `已选 ${selected.size} 课 · ${deck.length} 词`;
+  $('choose-sets').hidden = !!card;
   $('lesson').textContent = card ? card.lesson : '准备开始';
   $('counter').textContent = card ? `${position + 1} / ${deck.length}` : '0 / 0';
   $('face-label').textContent = card ? (revealed ? '答案 / ANSWER' : zh ? '中文 / CHINESE' : '日语 / JAPANESE') : '选择词卡集';
@@ -106,14 +162,16 @@ function render() {
   $('card').setAttribute('aria-label', card ? `${revealed ? '答案' : '词卡'}：${$('word').textContent}${revealed ? `，${card.reading}，${card.chinese}` : ''}。点击翻面` : '请先选择词卡集');
   $('progress').max = deck.length || 1; $('progress').value = card ? position + 1 : 0;
 }
-function flip() { if (deck.length) { revealed = !revealed; render(); } }
+function flip() { if (deck.length) { revealed = !revealed; if (revealed) recordReview(); render(); } }
 function move(delta) { if (position + delta >= 0 && position + delta < deck.length) { position += delta; revealed = false; render(); } }
 $('card').addEventListener('click',flip); $('flip').addEventListener('click',flip);
 $('previous').addEventListener('click',() => move(-1)); $('next').addEventListener('click',() => move(1));
 $('restart').addEventListener('click',rebuild);
-document.querySelectorAll('input[name="order"]').forEach(input => input.addEventListener('change',rebuild));
-$('direction').addEventListener('change',() => { revealed = false; render(); });
+document.querySelectorAll('input[name="order"]').forEach(input => input.addEventListener('change',() => { savePreferences(); rebuild(); }));
+$('direction').addEventListener('change',() => { savePreferences(); rebuild(); });
 document.addEventListener('keydown',event => {
+  if (event.key === 'Escape' && !$('app-menu').hidden) { closeMenu(); $('menu-button').focus(); return; }
+  if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;
   if (/INPUT|SELECT|TEXTAREA|BUTTON|A/.test(event.target.tagName) || event.altKey || event.ctrlKey || event.metaKey) return;
   if (['ArrowLeft','ArrowRight',' '].includes(event.key)) { event.preventDefault(); event.key === ' ' ? flip() : move(event.key === 'ArrowLeft' ? -1 : 1); }
 });
@@ -127,7 +185,7 @@ $('import-file').addEventListener('change',async event => {
     let message = `已导入 ${imported.length} 个词卡集。`;
     try { localStorage.setItem('kotoba-imports',JSON.stringify(sets.filter(set => set.id.startsWith('import-')))); message += '已保存在此浏览器。'; }
     catch { message += '浏览器无法保存，刷新后需重新导入。'; }
-    $('import-status').textContent = message; renderSets(); rebuild();
+    $('import-status').textContent = message; savePreferences(); renderSets(); rebuild();
   } catch (error) { $('import-status').textContent = `导入失败：${error instanceof SyntaxError ? 'JSON 格式不正确，请参考模板。' : error.message}`; }
   event.target.value = '';
 });

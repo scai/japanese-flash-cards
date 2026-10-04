@@ -11,10 +11,15 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <header><a class="brand" href="./"><span class="logo">言</span><span>言葉 <small>日语词卡</small></span></a><span class="header-note">每天一点，慢慢记住。</span></header>
+  <header>
+    <a class="brand" href="./"><span class="logo">言</span><span>言葉 <small>日语词卡</small></span></a>
+    <div class="header-context"><span id="lesson"></span><span id="loaded" class="badge"></span></div>
+    <div class="menu-wrap"><button id="menu-button" class="secondary" aria-label="菜单" title="菜单" aria-expanded="false" aria-controls="app-menu"><span aria-hidden="true">☰</span></button><nav id="app-menu" aria-label="应用菜单" hidden><button data-panel="sets-panel">词卡集管理</button><button data-panel="preferences-panel">偏好设置</button><button data-panel="history-panel">练习历史</button></nav></div>
+  </header>
   <main>
-    <aside aria-label="词卡集">
-      <div class="section-heading"><h1>我的词卡集</h1><span id="set-count"></span></div>
+    <dialog id="sets-panel" aria-labelledby="sets-title">
+      <div class="panel-heading"><h2 id="sets-title">词卡集管理</h2><button class="close-panel secondary" aria-label="关闭词卡集管理" autofocus>关闭</button></div>
+      <div class="section-heading"><h3>我的词卡集</h3><span id="set-count"></span></div>
       <p class="muted">选择一课，或把多课一起练习。</p>
       <div id="sets"></div>
       <button id="import-button" class="import-button">＋ 导入词卡集</button>
@@ -22,17 +27,28 @@
       <p class="small muted">支持 JSON 文件，可一次选择多个文件。<a href="sample-card-set.json" download>下载模板</a></p>
       <p id="import-status" class="small" role="status"></p>
       <div class="sample-note">已收录 14 课教材词表，按课号排列。第 15 课仅含图片中提供的 19 个词条。另附两组示例词卡。</div>
-    </aside>
+    </dialog>
     <section class="practice" aria-label="闪卡练习">
-      <div class="practice-heading"><div><p class="eyebrow">DAILY PRACTICE</p><h2>今天，记住几个新词。</h2></div><span id="loaded" class="badge"></span></div>
-      <div class="toolbar"><fieldset><legend class="sr-only">练习顺序</legend><label><input type="radio" name="order" value="ordered" checked><span>顺序练习</span></label><label><input type="radio" name="order" value="random"><span>随机练习</span></label></fieldset><label class="direction-label">卡片正面 <select id="direction"><option value="ja">日语</option><option value="zh">中文</option></select></label></div>
-      <div class="card-meta"><span id="lesson"></span><span id="counter"></span></div>
+      <button id="choose-sets" class="secondary" data-panel="sets-panel" hidden>选择词卡集</button>
+      <div class="card-meta"><span id="counter"></span></div>
       <button id="card" class="card" aria-label="翻转词卡"><span id="face-label" class="face-label"></span><span id="word" class="word" lang="ja"></span><span id="reading" class="reading" lang="ja"></span><span id="meaning" class="meaning"></span><span id="flip-hint" class="flip-hint">点击卡片，查看答案 ↻</span></button>
       <progress id="progress" value="1" max="1" aria-label="练习进度"></progress>
       <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="flip" class="primary">查看答案</button><button id="next" class="secondary">下一张 →</button></div>
       <div class="practice-footer"><span>快捷键：<kbd>←</kbd> <kbd>→</kbd> 切换 · <kbd>空格</kbd> 翻面</span><button id="restart" class="text-button">重新开始 ↺</button></div>
     </section>
   </main>
-  <footer>言葉 / KOTOBA <span>一张词卡，一点进步。</span></footer>
+  <dialog id="preferences-panel" aria-labelledby="preferences-title">
+    <div class="panel-heading"><h2 id="preferences-title">偏好设置</h2><button class="close-panel secondary" aria-label="关闭偏好设置" autofocus>关闭</button></div>
+    <p class="muted">自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。</p>
+    <fieldset><legend>练习顺序</legend><label><input type="radio" name="order" value="ordered" checked><span>顺序练习</span></label><label><input type="radio" name="order" value="random"><span>随机练习</span></label></fieldset>
+    <label class="direction-label">卡片正面 <select id="direction"><option value="ja">日语</option><option value="zh">中文</option></select></label>
+  </dialog>
+  <dialog id="history-panel" aria-labelledby="history-title">
+    <div class="panel-heading"><h2 id="history-title">练习历史</h2><button class="close-panel secondary" aria-label="关闭练习历史" autofocus>关闭</button></div>
+    <p class="muted">翻开答案即计为已复习，每轮同一张卡只计一次。记录保存在此浏览器，保留最近 100 轮。</p>
+    <p id="history-empty">还没有练习记录。翻开第一张卡片，开始今天的练习吧。</p>
+    <ol id="history-list"></ol>
+  </dialog>
+  <p id="storage-status" role="status"></p>
 </body>
 </html>

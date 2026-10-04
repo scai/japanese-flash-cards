@@ -8,6 +8,10 @@ A Chinese-language Japanese vocabulary practice app built with standard HTML5, C
 
 ## Use
 
+The main screen focuses on daily practice. Open **菜单** for **词卡集管理** (select lessons and import files), **偏好设置** (ordered/random practice and Japanese/Chinese fronts), or **练习历史**. Panels support keyboard navigation and Escape to close. Preferences and lesson selections are saved in this browser.
+
+Practice history starts when you reveal an answer. A card is counted once per round, even if flipped repeatedly; a round is complete when every card's answer has been revealed. Restarting, changing selected sets or preferences, or reloading starts a new round. The most recent 100 rounds are saved locally, including partial rounds; no earlier practice history is backfilled.
+
 Open `index.html` in a modern browser, or serve this directory using any static web server. Select one or multiple lesson sets, choose ordered or random practice, and click a card to reveal the reading and Chinese meaning. You can also practice with Chinese on the front. Previous/next navigation stops at the ends; Restart starts a new pass and reshuffles in random mode.
 
 Space flips a card; left/right arrows navigate when focus is outside interactive controls. Buttons also support their normal keyboard behavior.
