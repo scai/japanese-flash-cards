@@ -20,7 +20,7 @@ Space flips a card; left/right arrows navigate when the card is focused or focus
 
 End-user imports are not available. Vocabulary is maintained in the project source. Previously imported browser data is left untouched but is no longer loaded.
 
-The 14 supplied images are included as 14 textbook sets (514 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections are included in page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded. Lesson 15's supplied image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 is included once. The two other built-in sets are illustrative samples.
+The 15 supplied images are included as 15 textbook sets (568 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections are included in page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded. Lesson 15's supplied image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 is included once. The two other built-in sets are illustrative samples.
 
 | Lesson | Title | Cards |
 | --- | --- | ---: |
@@ -38,6 +38,7 @@ The 14 supplied images are included as 14 textbook sets (514 cards), named using
 | 25 | いろいろ お世話に なりました | 17 |
 | 26 | ごみは どこに 出したら いいですか | 47 |
 | 27 | 何でも 作れるんですね | 44 |
+| 28 | 出張も 多いし、試験も あるし…… | 54 |
 
 `textbook-sets.js` contains the newly transcribed sets and their source filenames from the sibling `vocab` folder; the existing Lesson 27 data remains in `app.js`. Images are not required to run the app. For a local preview with Node.js, run `node preview-server.cjs` and open `http://127.0.0.1:4173/`.
 
@@ -45,6 +46,7 @@ The 14 supplied images are included as 14 textbook sets (514 cards), named using
 
 The app is an installable Progressive Web App (PWA) with offline support:
 - **Installation**: Can be installed directly to home screens or desktops via browser install prompts on Android, iOS (Safari Share → "Add to Home Screen"), Windows, and macOS.
+- **Screen rotation**: Supports both portrait and landscape, subject to the device's auto-rotate settings. Existing installations may need time to receive the updated manifest; if the app stays portrait-only, reinstall it after loading the updated site online.
 - **Offline Practice**: Powered by `sw.js` and `manifest.webmanifest`. Application shell files and vocabulary datasets are cached for offline availability, enabling vocabulary study without an active internet connection.
 
 ## GitHub synchronization
