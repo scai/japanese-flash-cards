@@ -156,7 +156,16 @@ $('direction').addEventListener('change',() => { savePreferences(); rebuild(); }
 document.addEventListener('keydown',event => {
   if (event.key === 'Escape' && !$('app-menu').hidden) { closeMenu(); $('menu-button').focus(); return; }
   if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;
-  if (/INPUT|SELECT|TEXTAREA|BUTTON|A/.test(event.target.tagName) || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.altKey || event.ctrlKey || event.metaKey || event.target.isContentEditable) return;
+  // The card is a button: keep its native Space/Enter activation, but allow
+  // navigation shortcuts while it (or its contents) has focus.
+  if (event.target.closest('#card')) {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1);
+    }
+    return;
+  }
+  if (/INPUT|SELECT|TEXTAREA|BUTTON|A/.test(event.target.tagName)) return;
   if (['ArrowLeft','ArrowRight',' '].includes(event.key)) { event.preventDefault(); event.key === ' ' ? flip() : move(event.key === 'ArrowLeft' ? -1 : 1); }
 });
 renderSets(); rebuild();
