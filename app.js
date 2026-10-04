@@ -148,7 +148,42 @@ function render() {
 }
 function flip() { if (deck.length) { revealed = !revealed; if (revealed) recordReview(); render(); } }
 function move(delta) { if (position + delta >= 0 && position + delta < deck.length) { position += delta; revealed = false; render(); } }
-$('card').addEventListener('click',flip); $('flip').addEventListener('click',flip);
+let touchStartX = 0, touchStartY = 0, touchStartTime = 0, swiped = false, lastSwipeTime = 0;
+function onSwipeStart(x, y) {
+  touchStartX = x;
+  touchStartY = y;
+  touchStartTime = Date.now();
+  swiped = false;
+}
+function onSwipeEnd(x, y) {
+  if (!deck.length || Date.now() - lastSwipeTime < 300) return;
+  if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;
+  const diffX = x - touchStartX, diffY = y - touchStartY, elapsed = Date.now() - touchStartTime;
+  if (Math.abs(diffX) >= 40 && Math.abs(diffX) > Math.abs(diffY) * 1.25 && elapsed < 1000) {
+    swiped = true;
+    lastSwipeTime = Date.now();
+    move(diffX < 0 ? 1 : -1);
+    setTimeout(() => { swiped = false; }, 400);
+  }
+}
+const card = $('card');
+card.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) onSwipeStart(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: true });
+card.addEventListener('touchend', e => {
+  if (e.changedTouches.length === 1) onSwipeEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+}, { passive: true });
+card.addEventListener('touchcancel', () => { swiped = false; });
+if (window.PointerEvent) {
+  card.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') onSwipeStart(e.clientX, e.clientY); });
+  card.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') onSwipeEnd(e.clientX, e.clientY); });
+  card.addEventListener('pointercancel', () => { swiped = false; });
+}
+card.addEventListener('click', () => {
+  if (swiped) { swiped = false; return; }
+  flip();
+});
+$('flip').addEventListener('click', flip);
 $('previous').addEventListener('click',() => move(-1)); $('next').addEventListener('click',() => move(1));
 $('restart').addEventListener('click',rebuild);
 document.querySelectorAll('input[name="order"]').forEach(input => input.addEventListener('change',() => { savePreferences(); rebuild(); }));
