@@ -41,8 +41,14 @@ The 14 supplied images are included as 14 textbook sets (514 cards), named using
 
 `textbook-sets.js` contains the newly transcribed sets and their source filenames from the sibling `vocab` folder; the existing Lesson 27 data remains in `app.js`. Images are not required to run the app. For a local preview with Node.js, run `node preview-server.cjs` and open `http://127.0.0.1:4173/`.
 
+## Progressive Web App (PWA)
+
+The app is an installable Progressive Web App (PWA) with offline support:
+- **Installation**: Can be installed directly to home screens or desktops via browser install prompts on Android, iOS (Safari Share → "Add to Home Screen"), Windows, and macOS.
+- **Offline Practice**: Powered by `sw.js` and `manifest.webmanifest`. Application shell files and vocabulary datasets are cached for offline availability, enabling vocabulary study without an active internet connection.
+
 ## GitHub synchronization
 
-After a remote repository is configured, use `git pull --ff-only` before editing. To sync changes, run `git add index.html style.css app.js textbook-sets.js preview-server.cjs README.md .gitignore`, then `git commit -m "Update flashcards"` and `git push`. Synchronization is explicit, not an automatic background service.
+After a remote repository is configured, use `git pull --ff-only` before editing. To sync changes, run `git add index.html style.css app.js textbook-sets.js preview-server.cjs manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png README.md .gitignore`, then `git commit -m "Update flashcards"` and `git push`. Synchronization is explicit, not an automatic background service.
 
 The app can be hosted by any static hosting provider, including GitHub Pages.
