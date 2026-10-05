@@ -14,9 +14,18 @@ const assert = require('node:assert/strict');
           selected = new Set(sets.map(set => set.id)); rebuild();
           const failures = [];
           for (let i=0;i<deck.length;i++) {
-            position=i; revealed=true; render();
+            position=i; revealed=false; render();
+            const frontHeight=document.getElementById('card').getBoundingClientRect().height;
+            revealed=true; render();
             const card=document.getElementById('card');
+            if(Math.abs(frontHeight-card.getBoundingClientRect().height)>1) failures.push(`flip-resize-${i}`);
             if(card.scrollHeight>card.clientHeight+2) failures.push(i);
+            if(innerHeight>=innerWidth) {
+              const bounds=card.getBoundingClientRect();
+              const top=document.getElementById('word').getBoundingClientRect().top-document.getElementById('face-label').getBoundingClientRect().bottom;
+              const bottom=document.getElementById('flip-hint').getBoundingClientRect().top-document.getElementById('meaning').getBoundingClientRect().bottom;
+              if(Math.max(top,bottom)>bounds.height*0.3+1) failures.push(`whitespace-${i}`);
+            }
           }
           const card=document.getElementById('card').getBoundingClientRect();
           const cardStyle=getComputedStyle(document.getElementById('card'));

@@ -68,6 +68,10 @@ body>.practice-footer{width:100%;max-width:none;margin:0;padding:4px max(16px,en
 #storage-status:empty{display:none}
 .card .face-label{font-size:22px;line-height:1;letter-spacing:0;margin:0 0 auto;flex-shrink:0}
 .card .flip-hint{margin:auto 0 0;flex-shrink:0}
+@media(orientation:portrait){
+  .card{align-self:center}
+  .card .reading:empty{display:none}
+}
 @media(orientation:portrait) and (max-height:650px){
   .face-label{margin-bottom:10px}
   .word{font-size:28px;line-height:1.25}

@@ -148,7 +148,42 @@ function render() {
   $('flip').textContent = revealed ? '返回正面' : '查看答案';
   $('card').setAttribute('aria-label', card ? `${revealed ? '答案' : '词卡'}：${$('word').textContent}${revealed ? `，${card.reading}，${card.chinese}` : ''}。点击翻面` : '请先选择词卡集');
   $('progress').max = deck.length || 1; $('progress').value = card ? position + 1 : 0;
+  sizePortraitCard();
 }
+// Size for the larger face so flipping never changes the card's dimensions.
+function sizePortraitCard() {
+  const card = $('card');
+  if (!window.matchMedia('(orientation: portrait)').matches) {
+    card.style.removeProperty('max-height');
+    return;
+  }
+  const parts = ['word','reading','meaning'].map($);
+  const original = parts.map(el => el.textContent);
+  const measure = values => {
+    parts.forEach((el,i) => { el.textContent = values[i]; });
+    return parts.filter(el => el.textContent).reduce((sum, el) => {
+      const style = getComputedStyle(el);
+      return sum + el.getBoundingClientRect().height + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+    }, 0);
+  };
+  const entry = deck[position];
+  let contentHeight;
+  try {
+    contentHeight = entry ? Math.max(
+      measure([$('direction').value === 'zh' ? entry.chinese : entry.japanese,'','']),
+      measure([entry.japanese,entry.reading,entry.chinese])
+    ) : measure(original);
+  } finally {
+    parts.forEach((el,i) => { el.textContent = original[i]; });
+  }
+  const style = getComputedStyle(card);
+  const chromeHeight = $('face-label').getBoundingClientRect().height + $('flip-hint').getBoundingClientRect().height
+    + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+    + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+  card.style.maxHeight = `${Math.ceil(Math.max(contentHeight / 0.4, contentHeight + chromeHeight + 16))}px`;
+}
+new ResizeObserver(sizePortraitCard).observe(document.querySelector('.practice'));
+document.fonts.ready.then(sizePortraitCard);
 function flip() { if (deck.length) { revealed = !revealed; if (revealed) recordReview(); render(); } }
 function move(delta) { if (position + delta >= 0 && position + delta < deck.length) { position += delta; revealed = false; render(); } }
 let touchStartX = 0, touchStartY = 0, touchStartTime = 0, swiped = false, lastSwipeTime = 0;
