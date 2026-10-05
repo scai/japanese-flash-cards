@@ -1,0 +1,6 @@
+Edited using the built-in image generation tool.
+
+Use case: precise-object-edit.
+Edit target: the supplied teal and sky-blue language flashcard logo.
+Make exactly one targeted correction: rotate the white Chinese character 字 on the RIGHT BLUE CARD clockwise approximately 12 degrees about its center so its horizontal typographic axis is parallel to the blue card's top and bottom edges (these slope downward toward the right). The glyph currently looks upright relative to the canvas, which is incorrect. It must look printed squarely on the rotated blue card. Keep 字 authentic and legible, same lettering shape/style, stroke weight, size and centered position within the card; only change its rotation. Keep adequate margins.
+Preserve everything else precisely: left teal card and あ, central white arrow, blue card outline and rotation, card overlap, teal/blue/white colors, off-white background, composition, canvas and scale. No new text or decorative elements.

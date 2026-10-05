@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'kotoba-v1';
+const CACHE_NAME = 'kotoba-v2';
 const PRECACHE_ASSETS = [
   './',
   'index.html',
@@ -10,7 +10,8 @@ const PRECACHE_ASSETS = [
   'manifest.webmanifest',
   'icon.svg',
   'icon-192.png',
-  'icon-512.png'
+  'icon-512.png',
+  'icon-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {

@@ -11,7 +11,8 @@ const assets = new Map([
   ['manifest.webmanifest', 'application/manifest+json; charset=utf-8'],
   ['icon.svg', 'image/svg+xml; charset=utf-8'],
   ['icon-192.png', 'image/png'],
-  ['icon-512.png', 'image/png']
+  ['icon-512.png', 'image/png'],
+  ['icon-maskable-512.png', 'image/png']
 ]);
 http.createServer((req, res) => {
   let name;
