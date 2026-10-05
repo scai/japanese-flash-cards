@@ -54,12 +54,46 @@ const lesson27 = {id:'lesson-27',name:'第 27 课 · 何でも 作れるんで�
 const textbookLessons = [...imageLessons, {...lesson27, number:27, source:'第27課 何でも 作れるんですね.jpg'}].sort((a,b) => a.number - b.number);
 let sets = [...textbookLessons,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
 let history = [], session = null, reviewed = new Set();
+const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let activeSpeech = null;
+function stopPronunciation() {
+  if (activeSpeech) {
+    activeSpeech = null;
+    window.speechSynthesis.cancel();
+  }
+  $('speech-status').textContent = '';
+}
+function pronounce() {
+  const card = deck[position];
+  if (!card || !revealed || !$('auto-pronounce').checked) return;
+  if (!speechSupported) {
+    $('speech-status').textContent = '此浏览器不支持日语发音。';
+    return;
+  }
+  stopPronunciation();
+  // Speak the printed reading, excluding usage notes and placeholder marks.
+  const text = (card.reading || card.japanese).replace(/［[^］]*］|\[[^\]]*\]/g, '').replace(/[～〜]/g, '').trim();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ja-JP';
+  const voice = window.speechSynthesis.getVoices().find(voice => /^ja(?:[-_]|$)/i.test(voice.lang));
+  if (voice) utterance.voice = voice;
+  activeSpeech = utterance;
+  utterance.onend = () => { if (activeSpeech === utterance) activeSpeech = null; };
+  utterance.onerror = () => {
+    if (activeSpeech !== utterance) return;
+    activeSpeech = null;
+    $('speech-status').textContent = '无法播放日语发音，请检查设备的日语语音设置后重试。';
+  };
+  try { window.speechSynthesis.speak(utterance); }
+  catch { utterance.onerror(); }
+}
+window.addEventListener('pagehide', stopPronunciation);
 function saveLocal(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); }
   catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
 }
 function savePreferences() {
-  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,direction:$('direction').value,navigationSide:$('navigation-side').value});
+  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,direction:$('direction').value,navigationSide:$('navigation-side').value,autoPronounce:$('auto-pronounce').checked});
 }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
@@ -68,6 +102,7 @@ try {
     if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.map(id => id === 'sample-2' ? 'lesson-2' : id).filter(id => sets.some(set => set.id === id)));
     if (['ordered','random'].includes(prefs.order)) $('order').value = prefs.order;
     if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
+    if (typeof prefs.autoPronounce === 'boolean') $('auto-pronounce').checked = prefs.autoPronounce;
     if (['left','right'].includes(prefs.navigationSide)) $('navigation-side').value = prefs.navigationSide;
   }
   const savedHistory = JSON.parse(localStorage.getItem('kotoba-history') || '[]');
@@ -130,6 +165,7 @@ function rebuild() {
   position = 0; revealed = false; render();
 }
 function render() {
+  stopPronunciation();
   const card = deck[position], zh = $('direction').value === 'zh';
   $('loaded').textContent = `已选 ${selected.size} 课 · ${deck.length} 词`;
   $('choose-sets').hidden = !!card;
@@ -154,7 +190,7 @@ function render() {
 function sizePortraitCard() {
   const card = $('card');
   if (!window.matchMedia('(orientation: portrait)').matches) {
-    card.style.removeProperty('max-height');
+    $('card-shell').style.removeProperty('max-height');
     return;
   }
   const parts = ['word','reading','meaning'].map($);
@@ -180,11 +216,11 @@ function sizePortraitCard() {
   const chromeHeight = $('face-label').getBoundingClientRect().height + $('flip-hint').getBoundingClientRect().height
     + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
     + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-  card.style.maxHeight = `${Math.ceil(Math.max(contentHeight / 0.4, contentHeight + chromeHeight + 16))}px`;
+  $('card-shell').style.maxHeight = `${Math.ceil(Math.max(contentHeight / 0.4, contentHeight + chromeHeight + 16))}px`;
 }
 new ResizeObserver(sizePortraitCard).observe(document.querySelector('.practice'));
 document.fonts.ready.then(sizePortraitCard);
-function flip() { if (deck.length) { revealed = !revealed; if (revealed) recordReview(); render(); } }
+function flip() { if (deck.length) { revealed = !revealed; if (revealed) recordReview(); render(); if (revealed) pronounce(); } }
 function move(delta) { if (position + delta >= 0 && position + delta < deck.length) { position += delta; revealed = false; render(); } }
 let touchStartX = 0, touchStartY = 0, touchStartTime = 0, swiped = false, lastSwipeTime = 0;
 function onSwipeStart(x, y) {
@@ -226,6 +262,7 @@ $('previous').addEventListener('click',() => move(-1)); $('next').addEventListen
 $('restart').addEventListener('click',rebuild);
 $('order').addEventListener('change',() => { savePreferences(); rebuild(); });
 $('direction').addEventListener('change',() => { savePreferences(); rebuild(); });
+$('auto-pronounce').addEventListener('change',() => { savePreferences(); stopPronunciation(); });
 function applyNavigationSide() { document.body.dataset.navigationSide = $('navigation-side').value; }
 $('navigation-side').addEventListener('change',() => { applyNavigationSide(); savePreferences(); });
 applyNavigationSide();

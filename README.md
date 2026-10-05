@@ -20,6 +20,8 @@ Open `index.html` in a modern browser, or serve this directory using any static 
 
 Space flips a card; left/right arrows navigate when the card is focused or focus is outside other interactive controls. The card also supports Enter to flip. On touch devices, swiping left or right on the card navigates between cards. Other buttons retain their normal keyboard behavior, and practice shortcuts are inactive while a menu or panel is open.
 
+Japanese answers are pronounced automatically when revealed, using the browser's Web Speech API. Toggle **偏好设置 → 自动播放日语发音** to enable or disable this feature (on by default, saved locally without restarting practice). Turning it on takes effect on the next answer reveal. Usage brackets and placeholder marks are omitted from speech. The app prefers an installed Japanese voice; voice quality and offline playback depend on the browser and device. Flipping back, navigating or turning pronunciation off stops playback. Unsupported browsers and playback failures show an accessible message. With Playwright available and the preview server running, `node tests/pronunciation.cjs` checks speech behavior using a mocked speech API.
+
 ## Textbook vocabulary
 
 End-user imports are not available. Vocabulary is maintained in the project source. Previously imported browser data is left untouched but is no longer loaded.
