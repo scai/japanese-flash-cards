@@ -19,16 +19,23 @@ const assert = require('node:assert/strict');
             if(card.scrollHeight>card.clientHeight+2) failures.push(i);
           }
           const card=document.getElementById('card').getBoundingClientRect();
+          const cardStyle=getComputedStyle(document.getElementById('card'));
+          const icon=document.getElementById('face-label').getBoundingClientRect();
+          const hint=document.getElementById('flip-hint').getBoundingClientRect();
           const controls=document.querySelector('.controls').getBoundingClientRect();
           const footer=document.querySelector('.practice-footer').getBoundingClientRect();
           const next=document.getElementById('next').getBoundingClientRect();
           return {failures,scroll:document.documentElement.scrollHeight>innerHeight,
+            iconOffset:icon.top-card.top-parseFloat(cardStyle.paddingTop)-parseFloat(cardStyle.borderTopWidth),
+            hintOffset:card.bottom-hint.bottom-parseFloat(cardStyle.paddingBottom)-parseFloat(cardStyle.borderBottomWidth),
             footerBottom:footer.bottom,viewportHeight:innerHeight,controlsBottom:next.bottom,footerTop:footer.top,
             horizontal:document.documentElement.scrollWidth>innerWidth,left:controls.right<=card.left,right:controls.left>=card.right};
         });
         assert.deepEqual(result.failures,[],`${width}x${height}: card overflow`);
         assert.equal(result.scroll,false,`${width}x${height}: page overflow`);
         assert.equal(result.horizontal,false);
+        assert.ok(Math.abs(result.iconOffset)<1,'Icon anchored at card top');
+        assert.ok(Math.abs(result.hintOffset)<1,'Hint anchored at card bottom');
         if(width>height) assert.equal(result[side],true);
         assert.ok(Math.abs(result.footerBottom-result.viewportHeight)<1,'Footer anchored to viewport');
         assert.ok(result.controlsBottom<=result.footerTop && result.footerTop-result.controlsBottom<=12,'Controls directly above footer');

@@ -135,7 +135,9 @@ function render() {
   $('choose-sets').hidden = !!card;
   $('lesson').textContent = card ? card.lesson : '准备开始';
   $('counter').textContent = card ? `${position + 1} / ${deck.length}` : '0 / 0';
-  $('face-label').textContent = card ? (revealed ? '答案 / ANSWER' : zh ? '中文 / CHINESE' : '日语 / JAPANESE') : '选择词卡集';
+  $('face-label').textContent = card ? (revealed ? '💡' : '❓') : '📚';
+  $('face-label').title = card ? (revealed ? '答案' : '问题') : '选择词卡集';
+  $('face-label').setAttribute('aria-hidden','true');
   $('word').textContent = card ? (zh && !revealed ? card.chinese : card.japanese) : '先选一课吧';
   $('word').lang = zh && !revealed ? 'zh-CN' : 'ja';
   $('reading').textContent = card && revealed ? card.reading : '';
