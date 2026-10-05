@@ -23,10 +23,9 @@
     <div class="menu-wrap"><button id="menu-button" class="secondary" aria-label="菜单" title="菜单" aria-expanded="false" aria-controls="app-menu"><span aria-hidden="true">☰</span></button><nav id="app-menu" aria-label="应用菜单" hidden><button data-panel="sets-panel">词卡集管理</button><button data-panel="preferences-panel">偏好设置</button><button data-panel="history-panel">练习历史</button></nav></div>
   </header>
   <main>
-    <dialog id="sets-panel" aria-labelledby="sets-title">
+    <dialog id="sets-panel" aria-labelledby="sets-title" title="选择一课，或把多课一起练习。" aria-description="选择一课，或把多课一起练习。">
       <div class="panel-heading"><h2 id="sets-title">词卡集管理</h2><button class="close-panel secondary" aria-label="关闭词卡集管理" autofocus>关闭</button></div>
       <div class="section-heading"><h3>我的词卡集</h3><span id="set-count"></span></div>
-      <p class="muted">选择一课，或把多课一起练习。</p>
       <div id="sets"></div>
     </dialog>
     <section class="practice" aria-label="闪卡练习">
@@ -35,13 +34,11 @@
       <button id="card" class="card" aria-label="翻转词卡"><span id="face-label" class="face-label"></span><span id="word" class="word" lang="ja"></span><span id="reading" class="reading" lang="ja"></span><span id="meaning" class="meaning"></span><span id="flip-hint" class="flip-hint">点击卡片，查看答案 ↻</span></button>
       <progress id="progress" value="1" max="1" aria-label="练习进度"></progress>
       <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="flip" class="primary">查看答案</button><button id="next" class="secondary">下一张 →</button></div>
-      <div class="practice-footer"><span>快捷键：<kbd>←</kbd> <kbd>→</kbd> 切换 · <kbd>空格</kbd> 翻面</span><button id="restart" class="text-button">重新开始 ↺</button></div>
     </section>
   </main>
-  <dialog id="preferences-panel" aria-labelledby="preferences-title">
+  <dialog id="preferences-panel" aria-labelledby="preferences-title" title="自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。" aria-description="自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。">
     <div class="panel-heading"><h2 id="preferences-title">偏好设置</h2><button class="close-panel secondary" aria-label="关闭偏好设置" autofocus>关闭</button></div>
-    <p class="muted">自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。</p>
-    <fieldset><legend>练习顺序</legend><label><input type="radio" name="order" value="ordered" checked><span>顺序练习</span></label><label><input type="radio" name="order" value="random"><span>随机练习</span></label></fieldset>
+    <label class="direction-label">练习顺序 <select id="order"><option value="ordered">顺序练习</option><option value="random">随机练习</option></select></label>
     <label class="direction-label">卡片正面 <select id="direction"><option value="ja">日语</option><option value="zh">中文</option></select></label>
     <label class="direction-label">横屏导航位置 <select id="navigation-side"><option value="right">右侧</option><option value="left">左侧</option></select></label>
   </dialog>
@@ -52,5 +49,6 @@
     <ol id="history-list"></ol>
   </dialog>
   <p id="storage-status" role="status"></p>
+  <footer class="practice-footer"><span>快捷键：<kbd>←</kbd> <kbd>→</kbd> 切换 · <kbd>空格</kbd> 翻面</span><button id="restart" class="text-button">重新开始 ↺</button></footer>
 </body>
 </html>

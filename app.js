@@ -60,13 +60,13 @@ function saveLocal(key, value) {
   catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
 }
 function savePreferences() {
-  saveLocal('kotoba-preferences', {selected:[...selected],order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value,navigationSide:$('navigation-side').value});
+  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,direction:$('direction').value,navigationSide:$('navigation-side').value});
 }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
   if (prefs) {
     if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.filter(id => sets.some(set => set.id === id)));
-    if (['ordered','random'].includes(prefs.order)) document.querySelector(`input[name="order"][value="${prefs.order}"]`).checked = true;
+    if (['ordered','random'].includes(prefs.order)) $('order').value = prefs.order;
     if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
     if (['left','right'].includes(prefs.navigationSide)) $('navigation-side').value = prefs.navigationSide;
   }
@@ -77,7 +77,7 @@ function recordReview() {
   if (reviewed.has(position)) return;
   reviewed.add(position);
   if (!session) {
-    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:document.querySelector('input[name="order"]:checked').value,direction:$('direction').value};
+    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:$('order').value,direction:$('direction').value};
     history.unshift(session); history = history.slice(0,100);
   }
   session.reviewed = reviewed.size;
@@ -124,7 +124,7 @@ function renderSets() {
 function rebuild() {
   session = null; reviewed = new Set();
   deck = sets.filter(set => selected.has(set.id)).flatMap(set => set.cards.map(card => ({...card,lesson:set.name})));
-  if (document.querySelector('input[name="order"]:checked').value === 'random') {
+  if ($('order').value === 'random') {
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i],deck[j]] = [deck[j],deck[i]]; }
   }
   position = 0; revealed = false; render();
@@ -187,7 +187,7 @@ card.addEventListener('click', () => {
 $('flip').addEventListener('click', flip);
 $('previous').addEventListener('click',() => move(-1)); $('next').addEventListener('click',() => move(1));
 $('restart').addEventListener('click',rebuild);
-document.querySelectorAll('input[name="order"]').forEach(input => input.addEventListener('change',() => { savePreferences(); rebuild(); }));
+$('order').addEventListener('change',() => { savePreferences(); rebuild(); });
 $('direction').addEventListener('change',() => { savePreferences(); rebuild(); });
 function applyNavigationSide() { document.body.dataset.navigationSide = $('navigation-side').value; }
 $('navigation-side').addEventListener('change',() => { applyNavigationSide(); savePreferences(); });

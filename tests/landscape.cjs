@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
   try {
     const page = await browser.newPage();
     await page.goto('http://127.0.0.1:4173/');
-    for (const [width,height] of [[667,375],[812,375],[568,320],[844,390],[1024,768]]) {
+    for (const [width,height] of [[667,375],[812,375],[568,320],[844,390],[1024,768],[518,750],[390,844],[320,568]]) {
       await page.setViewportSize({width,height});
       for (const side of ['left','right']) {
         await page.selectOption('#navigation-side',side,{force:true});
@@ -20,13 +20,18 @@ const assert = require('node:assert/strict');
           }
           const card=document.getElementById('card').getBoundingClientRect();
           const controls=document.querySelector('.controls').getBoundingClientRect();
+          const footer=document.querySelector('.practice-footer').getBoundingClientRect();
+          const next=document.getElementById('next').getBoundingClientRect();
           return {failures,scroll:document.documentElement.scrollHeight>innerHeight,
+            footerBottom:footer.bottom,viewportHeight:innerHeight,controlsBottom:next.bottom,footerTop:footer.top,
             horizontal:document.documentElement.scrollWidth>innerWidth,left:controls.right<=card.left,right:controls.left>=card.right};
         });
         assert.deepEqual(result.failures,[],`${width}x${height}: card overflow`);
         assert.equal(result.scroll,false,`${width}x${height}: page overflow`);
         assert.equal(result.horizontal,false);
-        assert.equal(result[side],true);
+        if(width>height) assert.equal(result[side],true);
+        assert.ok(Math.abs(result.footerBottom-result.viewportHeight)<1,'Footer anchored to viewport');
+        assert.ok(result.controlsBottom<=result.footerTop && result.footerTop-result.controlsBottom<=12,'Controls directly above footer');
       }
     }
     await page.evaluate(() => {position=2; revealed=true; render();});
@@ -39,6 +44,20 @@ const assert = require('node:assert/strict');
     assert.equal(await page.evaluate(() => document.documentElement.scrollHeight>innerHeight),false);
     await page.setViewportSize({width:390,height:844});
     assert.equal(await page.locator('#navigation-side').inputValue(),'left');
-    console.log('PASS: all vocabulary answers fit five landscape viewports on both sides; preference persists; changing sides preserves progress; empty state works.');
+    await page.locator('#menu-button').click();
+    await page.locator('[data-panel="preferences-panel"]').click();
+    assert.equal(await page.locator('#preferences-panel select').count(),3);
+    await page.selectOption('#order','random');
+    await page.selectOption('#direction','zh');
+    await page.reload();
+    assert.equal(await page.locator('#order').inputValue(),'random');
+    assert.equal(await page.locator('#direction').inputValue(),'zh');
+    await page.evaluate(() => {selected = new Set(['sample-1']); rebuild(); flip();});
+    assert.equal(await page.evaluate(() => session.order),'random');
+    await page.selectOption('#order','ordered',{force:true});
+    assert.deepEqual(await page.evaluate(() => [position,revealed,session]),[0,false,null]);
+    assert.equal(await page.locator('#sets-panel > p.muted').count(),0);
+    assert.equal(await page.locator('#sets-panel').getAttribute('title'),'选择一课，或把多课一起练习。');
+    console.log('PASS: vocabulary fits eight portrait/landscape viewports; footer and controls anchored; side preference persists; progress and empty state work.');
   } finally {await browser.close();}
 })().catch(error => {console.error(error); process.exitCode=1;});
