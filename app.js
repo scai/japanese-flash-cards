@@ -1,7 +1,6 @@
 'use strict';
 const examples = [
   {id:'sample-1',name:'示例教材 · 第 1 课',cards:[{japanese:'私',reading:'わたし',chinese:'我'},{japanese:'学生',reading:'がくせい',chinese:'学生'},{japanese:'先生',reading:'せんせい',chinese:'老师'},{japanese:'日本',reading:'にほん',chinese:'日本'},{japanese:'中国',reading:'ちゅうごく',chinese:'中国'},{japanese:'友達',reading:'ともだち',chinese:'朋友'}]},
-  {id:'sample-2',name:'示例教材 · 第 2 课',cards:[{japanese:'本',reading:'ほん',chinese:'书'},{japanese:'辞書',reading:'じしょ',chinese:'词典'},{japanese:'時計',reading:'とけい',chinese:'钟表；手表'},{japanese:'傘',reading:'かさ',chinese:'伞'},{japanese:'鞄',reading:'かばん',chinese:'包'},{japanese:'鉛筆',reading:'えんぴつ',chinese:'铅笔'}]}
 ];
 const $ = id => document.getElementById(id);
 // Transcribed from the supplied Lesson 27 page, in textbook order:
@@ -65,7 +64,8 @@ function savePreferences() {
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
   if (prefs) {
-    if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.filter(id => sets.some(set => set.id === id)));
+    // The former Lesson 2 sample is now the complete textbook lesson.
+    if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.map(id => id === 'sample-2' ? 'lesson-2' : id).filter(id => sets.some(set => set.id === id)));
     if (['ordered','random'].includes(prefs.order)) $('order').value = prefs.order;
     if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
     if (['left','right'].includes(prefs.navigationSide)) $('navigation-side').value = prefs.navigationSide;

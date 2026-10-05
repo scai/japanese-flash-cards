@@ -58,6 +58,16 @@ const assert = require('node:assert/strict');
     assert.deepEqual(await page.evaluate(() => [position,revealed,session]),[0,false,null]);
     assert.equal(await page.locator('#sets-panel > p.muted').count(),0);
     assert.equal(await page.locator('#sets-panel').getAttribute('title'),'选择一课，或把多课一起练习。');
+    await page.evaluate(() => localStorage.setItem('kotoba-preferences',JSON.stringify({selected:['sample-2'],order:'ordered',direction:'ja'})));
+    await page.reload();
+    assert.deepEqual(await page.evaluate(() => [...selected]),['lesson-2']);
+    assert.equal(await page.locator('#lesson').textContent(),'第 2 课 · これから お世話に なります');
+    assert.equal(await page.locator('#counter').textContent(),'1 / 46');
+    assert.deepEqual(await page.evaluate(() => ({
+      lessons:textbookLessons.length,total:textbookLessons.reduce((sum,set)=>sum+set.cards.length,0),
+      oldSample:sets.some(set=>set.id==='sample-2'),
+      retained:['ほん','じしょ','とけい','かさ','かばん','えんぴつ'].every(reading=>deck.some(card=>card.reading===reading))
+    })),{lessons:16,total:614,oldSample:false,retained:true});
     console.log('PASS: vocabulary fits eight portrait/landscape viewports; footer and controls anchored; side preference persists; progress and empty state work.');
   } finally {await browser.close();}
 })().catch(error => {console.error(error); process.exitCode=1;});

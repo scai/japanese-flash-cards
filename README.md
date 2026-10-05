@@ -24,10 +24,11 @@ Space flips a card; left/right arrows navigate when the card is focused or focus
 
 End-user imports are not available. Vocabulary is maintained in the project source. Previously imported browser data is left untouched but is no longer loaded.
 
-The 15 supplied images are included as 15 textbook sets (568 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections are included in page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded. Lesson 15's supplied image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 is included once. The two other built-in sets are illustrative samples.
+The 16 supplied images are included as 16 textbook sets (614 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections are included in page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded. Lesson 15's supplied image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 is included once. Lesson 2 replaces the former six-card sample with all 46 scanned entries (37 vocabulary, 2 conversation, 7 exercise C); saved selections of the old sample load the textbook set. The remaining Lesson 1 set is an illustrative sample.
 
 | Lesson | Title | Cards |
 | --- | --- | ---: |
+| 2 | これから お世話に なります | 46 |
 | 3 | これを ください | 49 |
 | 5 | この 電車は 甲子園へ 行きますか | 61 |
 | 15 | ご家族は？ | 19 |
