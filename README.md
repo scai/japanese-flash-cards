@@ -22,6 +22,23 @@ Space flips a card; left/right arrows navigate when the card is focused or focus
 
 Japanese answers are pronounced automatically when revealed, using the browser's Web Speech API. Toggle **偏好设置 → 自动播放日语发音** to enable or disable this feature (on by default, saved locally without restarting practice). Turning it on takes effect on the next answer reveal. Usage brackets and placeholder marks are omitted from speech. The app prefers an installed Japanese voice; voice quality and offline playback depend on the browser and device. Flipping back, navigating or turning pronunciation off stops playback. Unsupported browsers and playback failures show an accessible message. With Playwright available and the preview server running, `node tests/pronunciation.cjs` checks speech behavior using a mocked speech API.
 
+## Tests
+
+The regression suite requires Node.js, Playwright (`npm install --no-save playwright`), and Microsoft Edge. From this directory, run:
+
+```sh
+node tests/run.cjs
+```
+
+The runner starts a preview server on an available local port, runs all five checks, and stops the server even if a check fails. Each check uses a fresh browser profile without changing your saved practice data.
+
+- `core.cjs`: question/answer rendering, bounded navigation, lesson selection and empty state, random-order permutations, history completion and deduplication, restart/reload behavior, history retention and validation, keyboard and touch controls, and storage failures.
+- `pronunciation.cjs` and `voice-input.cjs`: speech playback and recognition flows with mocked browser speech APIs.
+- `landscape.cjs`: all vocabulary across eight viewport sizes and both navigation positions, including preference persistence and legacy lesson migration.
+- `offline.cjs`: actual service worker installation, offline reload, cached vocabulary, and card navigation.
+
+To run one check against an already running preview, use `node tests/core.cjs` (or another filename). The default URL is `http://127.0.0.1:4173/`; set `TEST_BASE_URL` to test another local preview. The preview server also accepts `PORT` (default `4173`).
+
 ## Textbook vocabulary
 
 End-user imports are not available. Vocabulary is maintained in the project source. Previously imported browser data is left untouched but is no longer loaded.

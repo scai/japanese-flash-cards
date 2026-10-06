@@ -25,4 +25,6 @@ http.createServer((req, res) => {
   const stream = fs.createReadStream(path.join(__dirname, name));
   stream.on('error', () => { res.statusCode = 500; res.end('Unable to load asset'); });
   stream.pipe(res);
-}).listen(4173, '127.0.0.1', () => console.log('Preview: http://127.0.0.1:4173'));
+}).listen(Number(process.env.PORT || 4173), '127.0.0.1', function () {
+  console.log(`Preview: http://127.0.0.1:${this.address().port}`);
+});

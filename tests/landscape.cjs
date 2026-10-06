@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
   const browser = await chromium.launch({channel:'msedge',headless:true});
   try {
     const page = await browser.newPage();
-    await page.goto('http://127.0.0.1:4173/');
+    await page.goto((process.env.TEST_BASE_URL || 'http://127.0.0.1:4173/'));
     for (const [width,height] of [[667,375],[812,375],[568,320],[844,390],[1024,768],[518,750],[390,844],[320,568]]) {
       await page.setViewportSize({width,height});
       for (const side of ['left','right']) {
