@@ -56,6 +56,117 @@ let sets = [...textbookLessons,...examples], selected = new Set(['lesson-27']), 
 let history = [], session = null, reviewed = new Set();
 const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 let activeSpeech = null;
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let voiceEnabled = false, recognition = null, voiceTimer = null, voiceStartTimer = null;
+function voiceButtonState(state) {
+  $('microphone-label').textContent = state;
+  $('microphone').setAttribute('aria-label',`语音输入：${state}`);
+}
+function stopVoice() {
+  clearTimeout(voiceTimer); voiceTimer = null;
+  clearTimeout(voiceStartTimer); voiceStartTimer = null;
+  const previous = recognition; recognition = null;
+  if (previous) previous.abort();
+  voiceButtonState(voiceEnabled ? '等待回答' : '语音关闭');
+}
+function normalizeAnswer(text) {
+  return text.normalize('NFKC').replace(/［[^］]*］|\[[^\]]*\]/g,'')
+    .replace(/[\s\p{P}\p{S}]/gu,'').replace(/[ァ-ヶ]/g,char => String.fromCharCode(char.charCodeAt(0)-0x60));
+}
+function canListen() {
+  return voiceEnabled && deck.length && !revealed
+    && !document.querySelector('dialog[open]') && $('app-menu').hidden;
+}
+function voiceWaitingMessage() {
+  if (!voiceEnabled) return '';
+  if (!deck.length) return '请先选择词卡集。';
+  if (revealed) return '语音输入已开启。返回中文正面或切换下一张后开始监听。';
+  return '语音输入已开启，等待开始监听。';
+}
+function startVoice() {
+  if (!canListen() || recognition || voiceTimer) return;
+  stopPronunciation();
+  const listener = new Recognition(); recognition = listener;
+  listener.lang = 'ja-JP'; listener.interimResults = false; listener.maxAlternatives = 5;
+  let feedback = '没听清，请再试一次。';
+  let retry = true;
+  listener.onstart = () => {
+    if (recognition !== listener) return;
+    clearTimeout(voiceStartTimer); voiceStartTimer = null;
+    $('voice-status').textContent = '正在监听，请说出日语答案…';
+    voiceButtonState('正在监听');
+  };
+  listener.onresult = event => {
+    if (recognition !== listener || !canListen()) return;
+    const entry = deck[position];
+    const answers = [entry.japanese,entry.reading].filter(Boolean).map(normalizeAnswer).filter(Boolean);
+    const transcripts = Array.from(event.results[event.resultIndex]).map(result => normalizeAnswer(result.transcript));
+    if (transcripts.some(text => answers.includes(text))) {
+      retry = false;
+      $('face-label').textContent = '✅'; $('face-label').title = '回答正确';
+      $('voice-status').textContent = '回答正确！';
+      voiceButtonState('回答正确');
+      voiceTimer = setTimeout(() => { voiceTimer = null; if (canListen()) flip(); },1000);
+      listener.stop();
+    } else {
+      // A shared prefix or substantial contained phrase is useful retry feedback,
+      // but only a complete normalized answer advances the card.
+      const close = transcripts.some(text => text.length >= 2 && answers.some(answer =>
+        (answer.includes(text) || text.includes(answer)) && Math.min(text.length,answer.length) / Math.max(text.length,answer.length) >= 0.5));
+      feedback = close ? '很接近了，请再试一次。' : '还不正确，请再试一次。';
+      $('voice-status').textContent = feedback;
+    }
+  };
+  listener.onerror = event => {
+    if (recognition !== listener) return;
+    clearTimeout(voiceStartTimer); voiceStartTimer = null;
+    if (['not-allowed','service-not-allowed','audio-capture','network','language-not-supported'].includes(event.error)) {
+      retry = false; voiceEnabled = false;
+      $('microphone').setAttribute('aria-pressed','false');
+      const errors = {
+        'not-allowed':'麦克风权限被拒绝。请在浏览器地址栏的网站设置中允许麦克风，然后重新开启语音输入。',
+        'service-not-allowed':'浏览器不允许使用语音识别服务，请检查浏览器设置或更换浏览器。',
+        'audio-capture':'无法访问麦克风，请检查设备连接和系统麦克风权限。',
+        'network':'无法连接语音识别服务，请检查网络后重新开启语音输入。',
+        'language-not-supported':'此浏览器的语音识别服务不支持日语。'
+      };
+      feedback = errors[event.error];
+    }
+    $('voice-status').textContent = feedback;
+    voiceButtonState(voiceEnabled ? '请再试试' : '语音不可用');
+  };
+  listener.onend = () => {
+    if (recognition !== listener) return;
+    clearTimeout(voiceStartTimer); voiceStartTimer = null;
+    recognition = null;
+    if (retry && canListen()) {
+      $('voice-status').textContent = feedback;
+      voiceButtonState('请再试试');
+      voiceTimer = setTimeout(() => { voiceTimer = null; startVoice(); },500);
+    }
+  };
+  $('voice-status').textContent = '正在启动麦克风，请允许浏览器使用麦克风…';
+  voiceButtonState('正在启动');
+  voiceStartTimer = setTimeout(() => {
+    if (recognition !== listener) return;
+    voiceEnabled = false; stopVoice();
+    $('microphone').setAttribute('aria-pressed','false');
+    $('voice-status').textContent = '麦克风未能启动。请检查浏览器的麦克风权限提示和系统权限，然后重新开启语音输入。';
+    voiceButtonState('启动失败');
+  },15000);
+  try { listener.start(); }
+  catch { voiceEnabled = false; stopVoice(); $('microphone').setAttribute('aria-pressed','false'); $('voice-status').textContent = '无法启动语音输入，请重试。'; voiceButtonState('启动失败'); }
+}
+$('microphone').addEventListener('click',() => {
+  stopVoice();
+  if (!Recognition) { $('voice-status').textContent = '此浏览器不支持语音输入。'; voiceButtonState('语音不支持'); return; }
+  voiceEnabled = !voiceEnabled;
+  $('microphone').setAttribute('aria-pressed',String(voiceEnabled));
+  $('voice-status').textContent = voiceWaitingMessage();
+  voiceButtonState(voiceEnabled ? '等待回答' : '语音关闭');
+  startVoice();
+});
+window.addEventListener('pagehide',stopVoice);
 function stopPronunciation() {
   if (activeSpeech) {
     activeSpeech = null;
@@ -93,7 +204,7 @@ function saveLocal(key, value) {
   catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
 }
 function savePreferences() {
-  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,direction:$('direction').value,navigationSide:$('navigation-side').value,autoPronounce:$('auto-pronounce').checked});
+  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,navigationSide:$('navigation-side').value,autoPronounce:$('auto-pronounce').checked});
 }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
@@ -101,7 +212,6 @@ try {
     // The former Lesson 2 sample is now the complete textbook lesson.
     if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.map(id => id === 'sample-2' ? 'lesson-2' : id).filter(id => sets.some(set => set.id === id)));
     if (['ordered','random'].includes(prefs.order)) $('order').value = prefs.order;
-    if (['ja','zh'].includes(prefs.direction)) $('direction').value = prefs.direction;
     if (typeof prefs.autoPronounce === 'boolean') $('auto-pronounce').checked = prefs.autoPronounce;
     if (['left','right'].includes(prefs.navigationSide)) $('navigation-side').value = prefs.navigationSide;
   }
@@ -112,7 +222,7 @@ function recordReview() {
   if (reviewed.has(position)) return;
   reviewed.add(position);
   if (!session) {
-    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:$('order').value,direction:$('direction').value};
+    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:$('order').value,direction:'zh'};
     history.unshift(session); history = history.slice(0,100);
   }
   session.reviewed = reviewed.size;
@@ -131,18 +241,21 @@ function renderHistory() {
 function closeMenu() { $('app-menu').hidden = true; $('menu-button').setAttribute('aria-expanded','false'); }
 $('menu-button').addEventListener('click', () => {
   const opening = $('app-menu').hidden;
+  stopVoice();
   $('app-menu').hidden = !opening; $('menu-button').setAttribute('aria-expanded',String(opening));
   if (opening) $('app-menu').querySelector('button').focus();
+  else startVoice();
 });
-document.addEventListener('click',event => { if (!event.target.closest('.menu-wrap')) closeMenu(); });
+document.addEventListener('click',event => { if (!event.target.closest('.menu-wrap')) { closeMenu(); startVoice(); } });
 document.querySelectorAll('[data-panel]').forEach(button => button.addEventListener('click',() => {
+  stopVoice();
   closeMenu();
   if (button.dataset.panel === 'history-panel') renderHistory();
   $(button.dataset.panel).showModal();
 }));
 document.querySelectorAll('dialog').forEach(panel => {
   panel.querySelector('.close-panel').addEventListener('click',() => panel.close());
-  panel.addEventListener('close',() => $('menu-button').focus());
+  panel.addEventListener('close',() => { $('menu-button').focus(); startVoice(); });
 });
 function renderSets() {
   $('sets').replaceChildren();
@@ -165,8 +278,10 @@ function rebuild() {
   position = 0; revealed = false; render();
 }
 function render() {
+  stopVoice();
+  $('voice-status').textContent = voiceWaitingMessage();
   stopPronunciation();
-  const card = deck[position], zh = $('direction').value === 'zh';
+  const card = deck[position];
   $('loaded').textContent = `已选 ${selected.size} 课 · ${deck.length} 词`;
   $('choose-sets').hidden = !!card;
   $('lesson').textContent = card ? card.lesson : '准备开始';
@@ -174,17 +289,17 @@ function render() {
   $('face-label').textContent = card ? (revealed ? '💡' : '❓') : '📚';
   $('face-label').title = card ? (revealed ? '答案' : '问题') : '选择词卡集';
   $('face-label').setAttribute('aria-hidden','true');
-  $('word').textContent = card ? (zh && !revealed ? card.chinese : card.japanese) : '先选一课吧';
-  $('word').lang = zh && !revealed ? 'zh-CN' : 'ja';
+  $('word').textContent = card ? (!revealed ? card.chinese : card.japanese) : '先选一课吧';
+  $('word').lang = !revealed ? 'zh-CN' : 'ja';
   $('reading').textContent = card && revealed ? card.reading : '';
   $('meaning').textContent = card && revealed ? card.chinese : '';
   $('flip-hint').textContent = card ? (revealed ? '点击卡片，返回正面 ↻' : '点击卡片，查看答案 ↻') : '在词卡集中勾选想练习的课程';
-  $('card').disabled = !card; $('flip').disabled = !card; $('restart').disabled = !card;
+  $('card').disabled = !card; $('restart').disabled = !card;
   $('previous').disabled = !card || position === 0; $('next').disabled = !card || position === deck.length - 1;
-  $('flip').textContent = revealed ? '返回正面' : '查看答案';
   $('card').setAttribute('aria-label', card ? `${revealed ? '答案' : '词卡'}：${$('word').textContent}${revealed ? `，${card.reading}，${card.chinese}` : ''}。点击翻面` : '请先选择词卡集');
   $('progress').max = deck.length || 1; $('progress').value = card ? position + 1 : 0;
   sizePortraitCard();
+  startVoice();
 }
 // Size for the larger face so flipping never changes the card's dimensions.
 function sizePortraitCard() {
@@ -206,7 +321,7 @@ function sizePortraitCard() {
   let contentHeight;
   try {
     contentHeight = entry ? Math.max(
-      measure([$('direction').value === 'zh' ? entry.chinese : entry.japanese,'','']),
+      measure([entry.chinese,'','']),
       measure([entry.japanese,entry.reading,entry.chinese])
     ) : measure(original);
   } finally {
@@ -257,17 +372,15 @@ card.addEventListener('click', () => {
   if (swiped) { swiped = false; return; }
   flip();
 });
-$('flip').addEventListener('click', flip);
 $('previous').addEventListener('click',() => move(-1)); $('next').addEventListener('click',() => move(1));
 $('restart').addEventListener('click',rebuild);
 $('order').addEventListener('change',() => { savePreferences(); rebuild(); });
-$('direction').addEventListener('change',() => { savePreferences(); rebuild(); });
 $('auto-pronounce').addEventListener('change',() => { savePreferences(); stopPronunciation(); });
 function applyNavigationSide() { document.body.dataset.navigationSide = $('navigation-side').value; }
 $('navigation-side').addEventListener('change',() => { applyNavigationSide(); savePreferences(); });
 applyNavigationSide();
 document.addEventListener('keydown',event => {
-  if (event.key === 'Escape' && !$('app-menu').hidden) { closeMenu(); $('menu-button').focus(); return; }
+  if (event.key === 'Escape' && !$('app-menu').hidden) { closeMenu(); $('menu-button').focus(); startVoice(); return; }
   if (document.querySelector('dialog[open]') || !$('app-menu').hidden) return;
   if (event.altKey || event.ctrlKey || event.metaKey || event.target.isContentEditable) return;
   // The card is a button: keep its native Space/Enter activation, but allow

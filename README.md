@@ -8,15 +8,15 @@ A Chinese-language Japanese vocabulary practice app built with standard HTML5, C
 
 ## Use
 
-The main screen focuses on daily practice. Open **菜单** for **词卡集管理** (select lesson sets), **偏好设置** (ordered/random practice and Japanese/Chinese fronts), or **练习历史**. Panels support keyboard navigation and Escape to close. Preferences and lesson selections are saved in this browser.
+The main screen focuses on daily practice. Open **菜单** for **词卡集管理** (select lesson sets), **偏好设置** (practice order, pronunciation, and navigation position), or **练习历史**. Panels support keyboard navigation and Escape to close. Preferences and lesson selections are saved in this browser.
 
-Practice history starts when you reveal an answer. A card is counted once per round, even if flipped repeatedly; a round is complete when every card's answer has been revealed. Restarting, changing selected sets or preferences, or reloading starts a new round. The most recent 100 rounds are saved locally, including partial rounds; no earlier practice history is backfilled.
+Practice history starts when you reveal an answer. A card is counted once per round, even if flipped repeatedly; a round is complete when every card's answer has been revealed. Restarting, changing selected sets or practice order, or reloading starts a new round. The most recent 100 rounds are saved locally, including partial rounds; no earlier practice history is backfilled.
 
 In landscape, the practice screen fits the viewport with navigation beside the card. Choose **偏好设置 → 横屏导航位置** to place controls on the left or right (right by default). This preference is saved without restarting the round. Portrait retains controls below the card; secondary panels scroll independently when needed.
 
 Layout regression check: with Playwright and Microsoft Edge available, start the preview server and run `node tests/landscape.cjs`. It checks every vocabulary answer at five landscape sizes, both control positions, persistence, and the empty selection state.
 
-Open `index.html` in a modern browser, or serve this directory using any static web server. Select one or multiple lesson sets, choose ordered or random practice, and click a card to reveal the reading and Chinese meaning. You can also practice with Chinese on the front. Previous/next navigation stops at the ends; Restart starts a new pass and reshuffles in random mode.
+Open `index.html` in a modern browser, or serve this directory using any static web server. Select one or multiple lesson sets, choose ordered or random practice, and practice with Chinese questions, and click a card to reveal the Japanese word, reading, and Chinese meaning. Previous/next navigation stops at the ends; Restart starts a new pass and reshuffles in random mode.
 
 Space flips a card; left/right arrows navigate when the card is focused or focus is outside other interactive controls. The card also supports Enter to flip. On touch devices, swiping left or right on the card navigates between cards. Other buttons retain their normal keyboard behavior, and practice shortcuts are inactive while a menu or panel is open.
 
@@ -61,3 +61,9 @@ The app is an installable Progressive Web App (PWA) with offline support:
 After a remote repository is configured, use `git pull --ff-only` before editing. To sync changes, run `git add index.html style.css app.js textbook-sets.js preview-server.cjs manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png README.md .gitignore`, then `git commit -m "Update flashcards"` and `git push`. Synchronization is explicit, not an automatic background service.
 
 The app can be hosted by any static hosting provider, including GitHub Pages.
+
+## Voice answers
+
+Use the microphone toggle between **上一张** and **下一张** to enable Japanese voice input. The app listens while the Chinese prompt is visible. A matching Japanese word or reading shows ✅, then reveals the answer after one second. Incorrect or partially matching answers show retry feedback; listening continues until you reveal the answer, leave the card, or disable the microphone. Menus and panels pause listening. The toggle starts off each time the page loads.
+
+Voice input uses the browser Web Speech recognition API and requires microphone permission, a supported browser, and generally HTTPS or localhost. Recognition may require a network connection and may send audio to the browser's speech service. Kana variants, whitespace, punctuation, and printed usage notes are normalized for matching; a complete answer is required to advance. Run `node tests/voice-input.cjs` with Playwright and Microsoft Edge available and the preview server running to check the flow with mocked recognition.

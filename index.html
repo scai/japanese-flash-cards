@@ -36,14 +36,14 @@
         <span id="speech-status" class="speech-status" role="status"></span>
       </div>
       <progress id="progress" value="1" max="1" aria-label="练习进度"></progress>
-      <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="flip" class="primary">查看答案</button><button id="next" class="secondary">下一张 →</button></div>
+      <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="microphone" class="secondary" aria-label="语音输入" aria-pressed="false" title="语音输入"><span aria-hidden="true">🎤</span><span id="microphone-label">语音关闭</span></button><button id="next" class="secondary">下一张 →</button></div>
+      <p id="voice-status" role="status" class="sr-only"></p>
     </section>
   </main>
-  <dialog id="preferences-panel" aria-labelledby="preferences-title" title="自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。" aria-description="自动保存到此浏览器。更改顺序或卡片正面会开始新一轮练习。">
+  <dialog id="preferences-panel" aria-labelledby="preferences-title" title="自动保存到此浏览器。更改练习顺序会开始新一轮练习。" aria-description="自动保存到此浏览器。更改练习顺序会开始新一轮练习。">
     <div class="panel-heading"><h2 id="preferences-title">偏好设置</h2><button class="close-panel secondary icon-close" aria-label="关闭偏好设置" autofocus><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
-    <label class="direction-label">练习顺序 <select id="order"><option value="ordered">顺序练习</option><option value="random">随机练习</option></select></label>
-    <label class="direction-label">卡片正面 <select id="direction"><option value="ja">日语</option><option value="zh">中文</option></select></label>
     <label class="direction-label">自动播放日语发音 <input id="auto-pronounce" class="preference-switch" type="checkbox" role="switch" checked></label>
+    <label class="direction-label">练习顺序 <select id="order"><option value="ordered">顺序练习</option><option value="random">随机练习</option></select></label>
     <label class="direction-label">横屏导航位置 <select id="navigation-side"><option value="right">右侧</option><option value="left">左侧</option></select></label>
   </dialog>
   <dialog id="history-panel" aria-labelledby="history-title">

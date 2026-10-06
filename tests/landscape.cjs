@@ -62,12 +62,11 @@ const assert = require('node:assert/strict');
     assert.equal(await page.locator('#navigation-side').inputValue(),'left');
     await page.locator('#menu-button').click();
     await page.locator('[data-panel="preferences-panel"]').click();
-    assert.equal(await page.locator('#preferences-panel select').count(),3);
+    assert.equal(await page.locator('#preferences-panel select').count(),2);
     await page.selectOption('#order','random');
-    await page.selectOption('#direction','zh');
     await page.reload();
     assert.equal(await page.locator('#order').inputValue(),'random');
-    assert.equal(await page.locator('#direction').inputValue(),'zh');
+    assert.equal(await page.locator('#direction').count(),0);
     await page.evaluate(() => {selected = new Set(['sample-1']); rebuild(); flip();});
     assert.equal(await page.evaluate(() => session.order),'random');
     await page.selectOption('#order','ordered',{force:true});
@@ -79,6 +78,9 @@ const assert = require('node:assert/strict');
     assert.deepEqual(await page.evaluate(() => [...selected]),['lesson-2']);
     assert.equal(await page.locator('#lesson').textContent(),'第 2 课 · これから お世話に なります');
     assert.equal(await page.locator('#counter').textContent(),'1 / 46');
+    assert.equal(await page.evaluate(() => $('word').textContent === deck[0].chinese),true);
+    await page.locator('#card').click();
+    assert.equal(await page.evaluate(() => $('word').textContent === deck[0].japanese && session.direction === 'zh'),true);
     assert.deepEqual(await page.evaluate(() => ({
       lessons:textbookLessons.length,total:textbookLessons.reduce((sum,set)=>sum+set.cards.length,0),
       oldSample:sets.some(set=>set.id==='sample-2'),
