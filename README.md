@@ -22,6 +22,8 @@ Space flips a card; left/right arrows navigate when the card is focused or focus
 
 Japanese answers are pronounced automatically when revealed, using the browser's Web Speech API. Toggle **偏好设置 → 自动播放日语发音** to enable or disable this feature (on by default, saved locally without restarting practice). Turning it on takes effect on the next answer reveal. Usage brackets and placeholder marks are omitted from speech. The app prefers an installed Japanese voice; voice quality and offline playback depend on the browser and device. Flipping back, navigating or turning pronunciation off stops playback. Unsupported browsers and playback failures show an accessible message. With Playwright available and the preview server running, `node tests/pronunciation.cjs` checks speech behavior using a mocked speech API.
 
+Use **☆ / ★** in the practice toolbar to star or unstar the current card. Stars are saved in this browser's local preferences. **菜单 → 星标词练习** practices every starred card, including cards from unselected lessons; **课程练习** returns to selected lessons. The star reflects the current card in either mode. Removing a star keeps the current round intact; restarting or entering starred practice again refreshes its cards. Changing lesson selections returns to course practice. Reloading starts course practice with your saved stars.
+
 ## Tests
 
 The regression suite requires Node.js, Playwright (`npm install --no-save playwright`), and Microsoft Edge. From this directory, run:
@@ -30,9 +32,10 @@ The regression suite requires Node.js, Playwright (`npm install --no-save playwr
 node tests/run.cjs
 ```
 
-The runner starts a preview server on an available local port, runs all five checks, and stops the server even if a check fails. Each check uses a fresh browser profile without changing your saved practice data.
+The runner starts a preview server on an available local port, runs all six checks, and stops the server even if a check fails. Each check uses a fresh browser profile without changing your saved practice data.
 
 - `core.cjs`: question/answer rendering, bounded navigation, lesson selection and empty state, random-order permutations, history completion and deduplication, restart/reload behavior, history retention and validation, keyboard and touch controls, and storage failures.
+- `starred.cjs`: star toggles, persistence, both practice modes, unselected lessons, removing stars, empty states, history, and storage failures.
 - `pronunciation.cjs` and `voice-input.cjs`: speech playback and recognition flows with mocked browser speech APIs.
 - `landscape.cjs`: all vocabulary across eight viewport sizes and both navigation positions, including preference persistence and legacy lesson migration.
 - `offline.cjs`: actual service worker installation, offline reload, cached vocabulary, and card navigation.

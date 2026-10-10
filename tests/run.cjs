@@ -20,7 +20,7 @@ const run = file => new Promise((resolve, reject) => {
         if (match) { process.env.TEST_BASE_URL = `${match[1]}/`; clearTimeout(timeout); resolve(); }
       });
     });
-    for (const file of ['core.cjs', 'pronunciation.cjs', 'voice-input.cjs', 'landscape.cjs', 'offline.cjs']) await run(file);
+    for (const file of ['core.cjs', 'starred.cjs', 'pronunciation.cjs', 'voice-input.cjs', 'landscape.cjs', 'offline.cjs']) await run(file);
     console.log('All regression checks passed.');
   } finally { server.kill(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

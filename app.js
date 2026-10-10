@@ -54,6 +54,27 @@ const lesson27 = {id:'lesson-27',name:'第 27 课 · 何でも 作れるんで�
 const textbookLessons = [...imageLessons, {...lesson27, number:27, source:'第27課 何でも 作れるんですね.jpg'}].sort((a,b) => a.number - b.number);
 let sets = [...textbookLessons,...examples], selected = new Set(['lesson-27']), deck = [], position = 0, revealed = false;
 let history = [], session = null, reviewed = new Set();
+// Content-based identity survives shuffling and vocabulary insertions.
+const cardKey = (setId, card) => JSON.stringify([setId,card.japanese,card.reading,card.chinese]);
+const allCards = sets.flatMap(set => set.cards.map(card => ({...card,lesson:set.name,key:cardKey(set.id,card),setId:set.id})));
+let starred = new Set(), practiceMode = 'lessons';
+function renderStar() {
+  const card = deck[position], on = !!card && starred.has(card.key);
+  $('star').disabled = !card;
+  $('star').setAttribute('aria-pressed',String(on));
+  $('star').setAttribute('aria-label',on ? '取消星标' : '添加星标');
+  $('star').title = on ? '取消星标' : '添加星标';
+  $('star').textContent = on ? '★' : '☆';
+}
+$('star').addEventListener('click',() => {
+  const card = deck[position];
+  if (!card) return;
+  starred.has(card.key) ? starred.delete(card.key) : starred.add(card.key);
+  savePreferences(); renderStar();
+});
+document.querySelectorAll('[data-practice]').forEach(button => button.addEventListener('click',() => {
+  closeMenu(); practiceMode = button.dataset.practice; rebuild(); $('card').focus();
+}));
 const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 let activeSpeech = null;
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -204,11 +225,12 @@ function saveLocal(key, value) {
   catch { $('storage-status').textContent = '浏览器无法保存更改；本次仍可练习，但刷新后可能丢失设置和记录。'; }
 }
 function savePreferences() {
-  saveLocal('kotoba-preferences', {selected:[...selected],order:$('order').value,navigationSide:$('navigation-side').value,autoPronounce:$('auto-pronounce').checked});
+  saveLocal('kotoba-preferences', {selected:[...selected],starred:[...starred],order:$('order').value,navigationSide:$('navigation-side').value,autoPronounce:$('auto-pronounce').checked});
 }
 try {
   const prefs = JSON.parse(localStorage.getItem('kotoba-preferences') || 'null');
   if (prefs) {
+    if (Array.isArray(prefs.starred)) starred = new Set(prefs.starred.filter(key => typeof key === 'string' && allCards.some(card => card.key === key)));
     // The former Lesson 2 sample is now the complete textbook lesson.
     if (Array.isArray(prefs.selected)) selected = new Set(prefs.selected.map(id => id === 'sample-2' ? 'lesson-2' : id).filter(id => sets.some(set => set.id === id)));
     if (['ordered','random'].includes(prefs.order)) $('order').value = prefs.order;
@@ -222,7 +244,7 @@ function recordReview() {
   if (reviewed.has(position)) return;
   reviewed.add(position);
   if (!session) {
-    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:sets.filter(set => selected.has(set.id)).map(set => set.name),total:deck.length,reviewed:0,order:$('order').value,direction:'zh'};
+    session = {id:crypto.randomUUID(),startedAt:new Date().toISOString(),lessons:[...(practiceMode === 'starred' ? ['星标词练习'] : []),...new Set(deck.map(card => card.lesson))],total:deck.length,reviewed:0,order:$('order').value,direction:'zh'};
     history.unshift(session); history = history.slice(0,100);
   }
   session.reviewed = reviewed.size;
@@ -262,7 +284,7 @@ function renderSets() {
   sets.forEach(set => {
     const label = document.createElement('label'); label.className = 'set';
     const input = document.createElement('input'); input.type = 'checkbox'; input.checked = selected.has(set.id);
-    input.addEventListener('change', () => { input.checked ? selected.add(set.id) : selected.delete(set.id); savePreferences(); rebuild(); });
+    input.addEventListener('change', () => { input.checked ? selected.add(set.id) : selected.delete(set.id); practiceMode = 'lessons'; savePreferences(); rebuild(); });
     const copy = document.createElement('span'), title = document.createElement('strong'), count = document.createElement('small');
     title.textContent = set.name; count.textContent = `${set.cards.length} 个单词`;
     copy.append(title,count); label.append(input,copy); $('sets').append(label);
@@ -271,7 +293,7 @@ function renderSets() {
 }
 function rebuild() {
   session = null; reviewed = new Set();
-  deck = sets.filter(set => selected.has(set.id)).flatMap(set => set.cards.map(card => ({...card,lesson:set.name})));
+  deck = allCards.filter(card => practiceMode === 'starred' ? starred.has(card.key) : selected.has(card.setId));
   if ($('order').value === 'random') {
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i],deck[j]] = [deck[j],deck[i]]; }
   }
@@ -282,18 +304,20 @@ function render() {
   $('voice-status').textContent = voiceWaitingMessage();
   stopPronunciation();
   const card = deck[position];
-  $('loaded').textContent = `已选 ${selected.size} 课 · ${deck.length} 词`;
+  $('loaded').textContent = practiceMode === 'starred' ? `星标练习 · ${deck.length} 词` : `已选 ${selected.size} 课 · ${deck.length} 词`;
+  document.querySelectorAll('[data-practice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.practice === practiceMode)));
+  renderStar();
   $('choose-sets').hidden = !!card;
   $('lesson').textContent = card ? card.lesson : '准备开始';
   $('counter').textContent = card ? `${position + 1} / ${deck.length}` : '0 / 0';
   $('face-label').textContent = card ? (revealed ? '💡' : '❓') : '📚';
   $('face-label').title = card ? (revealed ? '答案' : '问题') : '选择词卡集';
   $('face-label').setAttribute('aria-hidden','true');
-  $('word').textContent = card ? (!revealed ? card.chinese : card.japanese) : '先选一课吧';
+  $('word').textContent = card ? (!revealed ? card.chinese : card.japanese) : (practiceMode === 'starred' ? '还没有星标词' : '先选一课吧');
   $('word').lang = !revealed ? 'zh-CN' : 'ja';
   $('reading').textContent = card && revealed ? card.reading : '';
   $('meaning').textContent = card && revealed ? card.chinese : '';
-  $('flip-hint').textContent = card ? (revealed ? '点击卡片，返回正面 ↻' : '点击卡片，查看答案 ↻') : '在词卡集中勾选想练习的课程';
+  $('flip-hint').textContent = card ? (revealed ? '点击卡片，返回正面 ↻' : '点击卡片，查看答案 ↻') : (practiceMode === 'starred' ? '在课程练习中点击 ☆ 添加星标' : '在词卡集中勾选想练习的课程');
   $('card').disabled = !card; $('restart').disabled = !card;
   $('previous').disabled = !card || position === 0; $('next').disabled = !card || position === deck.length - 1;
   $('card').setAttribute('aria-label', card ? `${revealed ? '答案' : '词卡'}：${$('word').textContent}${revealed ? `，${card.reading}，${card.chinese}` : ''}。点击翻面` : '请先选择词卡集');

@@ -1,0 +1,67 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+(async () => {
+  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const context = await browser.newContext({ serviceWorkers: 'block' });
+  try {
+    const page = await context.newPage(), errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(process.env.TEST_BASE_URL || 'http://127.0.0.1:4173/');
+    const mode = async value => {
+      await page.locator('#menu-button').click();
+      await page.locator(`[data-practice="${value}"]`).click();
+    };
+    const pressed = () => page.locator('#star').getAttribute('aria-pressed');
+    await mode('starred');
+    assert.equal(await page.locator('#star').isDisabled(), true);
+    assert.equal(await page.locator('#word').textContent(), '还没有星标词');
+    await mode('lessons');
+    const first = await page.locator('#word').textContent();
+    await page.locator('#star').focus(); await page.keyboard.press('Space');
+    assert.equal(await pressed(), 'true');
+    assert.equal(await page.evaluate(() => revealed), false);
+    await page.locator('#card').click();
+    assert.equal(await pressed(), 'true');
+    await page.locator('#next').click();
+    assert.equal(await pressed(), 'false');
+    await page.locator('#star').click();
+    const second = await page.locator('#word').textContent();
+    await page.reload();
+    assert.equal(await pressed(), 'true');
+    await page.locator('#menu-button').click();
+    await page.locator('#app-menu [data-panel="sets-panel"]').click();
+    await page.locator('#sets input:checked').uncheck();
+    await page.locator('#sets-panel .close-panel').click();
+    await mode('starred');
+    assert.equal(await page.locator('#counter').textContent(), '1 / 2');
+    assert.equal(await page.locator('#word').textContent(), first);
+    assert.equal(await pressed(), 'true');
+    await page.locator('#card').click();
+    assert.deepEqual(await page.evaluate(() => session.lessons), ['星标词练习', '第 27 课 · 何でも 作れるんですね']);
+    await page.locator('#star').click();
+    assert.equal(await pressed(), 'false');
+    assert.equal(await page.evaluate(() => revealed), true);
+    await page.locator('#next').click();
+    assert.equal(await page.locator('#word').textContent(), second);
+    assert.equal(await pressed(), 'true');
+    await page.locator('#previous').click(); assert.equal(await pressed(), 'false');
+    await page.locator('#restart').click();
+    assert.equal(await page.locator('#counter').textContent(), '1 / 1');
+    assert.equal(await page.locator('#word').textContent(), second);
+    await page.locator('#star').click(); await page.locator('#restart').click();
+    assert.equal(await page.locator('#counter').textContent(), '0 / 0');
+    assert.equal(await page.locator('#star').isDisabled(), true);
+    await page.evaluate(() => {
+      const prefs = JSON.parse(localStorage.getItem('kotoba-preferences'));
+      prefs.selected = ['lesson-27']; prefs.starred = [null, {}, 'unknown'];
+      localStorage.setItem('kotoba-preferences', JSON.stringify(prefs));
+    });
+    await page.reload(); assert.equal(await pressed(), 'false');
+    await page.evaluate(() => { Storage.prototype.setItem = () => { throw new Error('quota'); }; });
+    await page.locator('#star').click(); assert.equal(await pressed(), 'true');
+    assert.match(await page.locator('#storage-status').textContent(), /无法保存/);
+    await mode('starred'); assert.equal(await page.locator('#counter').textContent(), '1 / 1');
+    assert.deepEqual(errors, []);
+    console.log('PASS: stars, persistence, practice modes, unstar, empty state, history and storage failures.');
+  } finally { await context.close(); await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });
