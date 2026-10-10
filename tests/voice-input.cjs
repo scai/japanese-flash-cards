@@ -13,7 +13,7 @@ const assert = require('node:assert/strict');
         abort(){this.aborted=true;this.onend();}
       };
     });
-    await page.goto('http://127.0.0.1:4173/');
+    await page.goto((process.env.TEST_BASE_URL || 'http://127.0.0.1:4173/'));
     await page.locator('#microphone').click();
     assert.equal(await page.evaluate(()=>listeners.length),1);
     assert.equal(await page.locator('#direction').count(),0);
@@ -64,7 +64,7 @@ const assert = require('node:assert/strict');
     assert.match(await page.locator('#voice-status').textContent(),/未能启动/);
     const unsupported=await browser.newPage();
     await unsupported.addInitScript(()=>{delete window.SpeechRecognition;delete window.webkitSpeechRecognition;});
-    await unsupported.goto('http://127.0.0.1:4173/');
+    await unsupported.goto((process.env.TEST_BASE_URL || 'http://127.0.0.1:4173/'));
     await unsupported.locator('#microphone').click();
     assert.match(await unsupported.locator('#voice-status').textContent(),/不支持/);
     console.log('PASS: voice matching, close answers, retries, delayed reveal, navigation cancellation, menu pause, permissions, unsupported browser.');

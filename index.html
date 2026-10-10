@@ -20,7 +20,7 @@
   <header>
     <a class="brand" href="./" aria-label="言葉 · 日语词卡"><img class="logo" src="icon-512.png" width="43" height="43" alt=""><span>言葉 <small>日语词卡</small></span></a>
     <div class="header-context"><span id="lesson"></span><span id="loaded" class="badge"></span></div>
-    <div class="menu-wrap"><button id="menu-button" class="secondary" aria-label="菜单" title="菜单" aria-expanded="false" aria-controls="app-menu"><span aria-hidden="true">☰</span></button><nav id="app-menu" aria-label="应用菜单" hidden><button data-panel="sets-panel">词卡集管理</button><button data-panel="preferences-panel">偏好设置</button><button data-panel="history-panel">练习历史</button></nav></div>
+    <div class="menu-wrap"><button id="menu-button" class="secondary" aria-label="菜单" title="菜单" aria-expanded="false" aria-controls="app-menu"><span aria-hidden="true">☰</span></button><nav id="app-menu" aria-label="应用菜单" hidden><button data-practice="lessons" aria-pressed="true">课程练习</button><button data-practice="starred" aria-pressed="false">星标词练习</button><button data-panel="sets-panel">词卡集管理</button><button data-panel="preferences-panel">偏好设置</button><button data-panel="history-panel">练习历史</button></nav></div>
   </header>
   <main>
     <dialog id="sets-panel" aria-labelledby="sets-title" title="选择一课，或把多课一起练习。" aria-description="选择一课，或把多课一起练习。">
@@ -36,7 +36,7 @@
         <span id="speech-status" class="speech-status" role="status"></span>
       </div>
       <progress id="progress" value="1" max="1" aria-label="练习进度"></progress>
-      <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="microphone" class="secondary" aria-label="语音输入" aria-pressed="false" title="语音输入"><span aria-hidden="true">🎤</span><span id="microphone-label">语音关闭</span></button><button id="next" class="secondary">下一张 →</button></div>
+      <div class="controls"><button id="previous" class="secondary">← 上一张</button><button id="microphone" class="secondary" aria-label="语音输入" aria-pressed="false" title="语音输入"><span aria-hidden="true">🎤</span><span id="microphone-label">语音关闭</span></button><button id="star" class="secondary" aria-label="添加星标" aria-pressed="false" title="添加星标">☆</button><button id="next" class="secondary">下一张 →</button></div>
       <p id="voice-status" role="status" class="sr-only"></p>
     </section>
   </main>
