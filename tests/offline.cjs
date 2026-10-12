@@ -20,7 +20,7 @@ const assert = require('node:assert/strict');
     assert.equal(await page.locator('#word').textContent(), '飼います');
     await page.locator('#next').click();
     assert.equal(await page.locator('#counter').textContent(), '2 / 44');
-    assert.equal(await page.evaluate(() => textbookLessons.reduce((n, lesson) => n + lesson.cards.length, 0)), 614);
+    assert.equal(await page.evaluate(() => textbookLessons.reduce((n, lesson) => n + lesson.cards.length, 0)), 666);
     console.log('PASS: service worker installation and offline reload, vocabulary and practice.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

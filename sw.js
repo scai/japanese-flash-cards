@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'kotoba-v6';
+const CACHE_NAME = 'kotoba-v7';
 const PRECACHE_ASSETS = [
   './',
   'index.html',

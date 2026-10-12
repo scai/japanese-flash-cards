@@ -49,7 +49,7 @@ History starts when you reveal an answer. A card is counted once per round, even
 
 End-user imports are not available. Vocabulary is maintained in project source. Previously imported browser data is left untouched but is no longer loaded.
 
-The 16 supplied images provide 16 textbook sets (614 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections follow page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded.
+The 17 supplied images provide 17 textbook sets (666 cards), named using their printed lesson numbers and titles. Vocabulary, conversation, exercise C, related-word, and reading sections follow page order wherever present. Readings, usage brackets, printed verb groups, and traditional Chinese meanings are retained; pitch-accent marks and editorial asterisks are not encoded.
 
 Lesson 15's image contains only page 38 (19 entries); no missing-page vocabulary is inferred. Lesson 27 appears once. Lesson 2 replaces the former six-card sample with all 46 scanned entries (37 vocabulary, 2 conversation, 7 exercise C); saved selections of the old sample load the textbook set. The remaining Lesson 1 set is an illustrative sample.
 
@@ -71,6 +71,7 @@ Lesson 15's image contains only page 38 (19 entries); no missing-page vocabulary
 | 26 | ごみは どこに 出したら いいですか | 47 |
 | 27 | 何でも 作れるんですね | 44 |
 | 28 | 出張も 多いし、試験も あるし…… | 54 |
+| 29 | 忘れ物を して しまったんです | 52 |
 
 `textbook-sets.js` contains transcribed sets and source filenames from the sibling `vocab` folder. Lesson 27 data remains in `app.js`. Images are not required to run the app.
 
@@ -163,7 +164,7 @@ node preview-server.cjs
 
 应用不提供用户导入功能，词汇在项目源文件中维护。以前导入的浏览器数据不会被删除，但也不会再加载。
 
-所提供的 16 张教材图片对应 16 个词卡集，共 614 张卡片，按教材印刷的课号和标题命名。图片中出现的单词、会话、练习 C、相关词汇及阅读部分，均按页面顺序收录。读音、用法方括号、印刷的动词组别和繁体中文释义予以保留；音调标记和编辑用星号未编码。
+所提供的 17 张教材图片对应 17 个词卡集，共 666 张卡片，按教材印刷的课号和标题命名。图片中出现的单词、会话、练习 C、相关词汇及阅读部分，均按页面顺序收录。读音、用法方括号、印刷的动词组别和繁体中文释义予以保留；音调标记和编辑用星号未编码。
 
 第 15 课图片仅包含第 38 页的 19 个条目，未推测缺失页面的词汇。第 27 课只收录一次。第 2 课以扫描得到的全部 46 个条目替换原先的六词示例，包括 37 个单词、2 个会话条目和 7 个练习 C 条目；旧示例的已保存选择会自动加载完整教材课。保留的第 1 课词卡集为演示示例。
 
@@ -185,6 +186,7 @@ node preview-server.cjs
 | 26 | ごみは どこに 出したら いいですか | 47 |
 | 27 | 何でも 作れるんですね | 44 |
 | 28 | 出張も 多いし、試験も あるし…… | 54 |
+| 29 | 忘れ物を して しまったんです | 52 |
 
 `textbook-sets.js` 包含转录的词卡集，以及同级 `vocab` 文件夹中的来源图片文件名；第 27 课数据仍位于 `app.js`。运行应用无需这些图片。
 
