@@ -85,7 +85,7 @@ const assert = require('node:assert/strict');
       lessons:textbookLessons.length,total:textbookLessons.reduce((sum,set)=>sum+set.cards.length,0),
       oldSample:sets.some(set=>set.id==='sample-2'),
       retained:['ほん','じしょ','とけい','かさ','かばん','えんぴつ'].every(reading=>deck.some(card=>card.reading===reading))
-    })),{lessons:16,total:614,oldSample:false,retained:true});
+    })),{lessons:17,total:666,oldSample:false,retained:true});
     console.log('PASS: vocabulary fits eight portrait/landscape viewports; footer and controls anchored; side preference persists; progress and empty state work.');
   } finally {await browser.close();}
 })().catch(error => {console.error(error); process.exitCode=1;});
